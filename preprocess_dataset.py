@@ -36,6 +36,6 @@ if __name__ == '__main__':
     parser.add_argument("--dataset", default="./dataset",
                         help="dataset path")
     parser.add_argument("--seed", default=123,
-                        help="seed")
+                        help="seed", type=int)
     args = parser.parse_args()
     main(args)

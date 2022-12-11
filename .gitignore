@@ -130,3 +130,6 @@ dmypy.json
 .idea
 /save/
 /dataset
+/test*
+/distilgpt2-enfatic
+*.ipynb
