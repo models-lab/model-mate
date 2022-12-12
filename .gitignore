@@ -133,3 +133,4 @@ dmypy.json
 /test*
 /distilgpt2-enfatic
 *.ipynb
+/gpt2-enfatic

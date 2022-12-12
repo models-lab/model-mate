@@ -7,15 +7,17 @@ from transformers import AutoConfig
 
 from preprocess_dataset import TRAIN_TXT, SPECIAL_TOKEN
 
-MODEL_CONFIG = "distilgpt2"
-MODEL_DIR = MODEL_CONFIG + "-enfatic"
-TOKENIZER_JSON = os.path.join(MODEL_DIR, "tokenizer.json")
-
 
 def main(args):
+
+    model_config = args.model_config
+    model_dir = model_config + "-enfatic"
+    tokenizer_json = os.path.join(model_dir, "tokenizer.json")
+
     dataset = load_dataset("text", data_files={"train": os.path.join(args.dataset, TRAIN_TXT)})["train"]
     tokenizer = ByteLevelBPETokenizer()
-    config = AutoConfig.from_pretrained(MODEL_CONFIG)
+    # consider gpt-2 model from scratch
+    config = AutoConfig.from_pretrained(model_config)
 
     def batch_iterator(batch_size=100):
         for i in range(0, len(dataset), batch_size):
@@ -25,16 +27,12 @@ def main(args):
         "<s>",
         "</s>",
         "<unk>",
-        "<pad>",
-        "<mask>",
         SPECIAL_TOKEN,
     ])
-    os.makedirs(MODEL_DIR, exist_ok=True)
-    tokenizer.save(TOKENIZER_JSON)
+    os.makedirs(model_dir, exist_ok=True)
+    tokenizer.save(tokenizer_json)
 
-    config.n_layer = 3
-    config.n_head = 6
-    config.save_pretrained(MODEL_DIR)
+    config.save_pretrained(model_dir)
 
 
 if __name__ == '__main__':
@@ -43,5 +41,7 @@ if __name__ == '__main__':
                         help="dataset path")
     parser.add_argument("--seed", default=123,
                         help="seed", type=int)
+    parser.add_argument("--model_config", default="gpt2", choices=["distilgpt2",
+                                                                   "gpt2"])
     args = parser.parse_args()
     main(args)

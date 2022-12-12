@@ -3,10 +3,9 @@ import os
 
 from datasets import load_dataset
 from transformers import AutoTokenizer, DataCollatorForLanguageModeling, TrainingArguments, Trainer, GPT2LMHeadModel, \
-    AutoConfig
+    AutoConfig, EarlyStoppingCallback
 
 from preprocess_dataset import TRAIN_TXT, TEST_TXT, VAL_TXT, SPECIAL_TOKEN
-from train_tokenizer import MODEL_DIR
 
 
 def main(args):
@@ -16,15 +15,16 @@ def main(args):
     if args.is_pretrained:
         model_dir = args.huggingface_model
         tokenizer = AutoTokenizer.from_pretrained(f"{model_dir}", bos_token='<s>',
-                                                  eos_token='</s>', pad_token='</s>')
+                                                  eos_token='</s>', pad_token='</s>',
+                                                  unk_token='<unk>')
+        tokenizer.add_tokens([SPECIAL_TOKEN])
     else:
-        model_dir = MODEL_DIR
+        model_dir = args.model_dir
         tokenizer = AutoTokenizer.from_pretrained(f"{model_dir}", bos_token='<s>',
                                                   eos_token='</s>', pad_token='</s>',
-                                                  special_tokens=[SPECIAL_TOKEN])
-    # print(tokenizer('<s> @ namespace ( uri = <STR_URI_PREFIX> , prefix = <STR_URI_PREFIX> ) package employee'))
-    # print(tokenizer.pad_token)
-    context_length = 128
+                                                  special_tokens=[SPECIAL_TOKEN],
+                                                  unk_token='<unk>')
+    context_length = args.context_length
 
     def tokenize(element):
         outputs = tokenizer(
@@ -55,14 +55,15 @@ def main(args):
     else:
         config = AutoConfig.from_pretrained(model_dir)
         model = GPT2LMHeadModel(config)
+        model.resize_token_embeddings(len(tokenizer))
 
     print(model.transformer.wte.weight.shape[0])
     print(len(tokenizer))
 
     args_training = TrainingArguments(
         output_dir=args.output_path_model,
-        per_device_train_batch_size=32,
-        per_device_eval_batch_size=32,
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=8,
         evaluation_strategy="epoch",
         logging_strategy="epoch",
         gradient_accumulation_steps=8,
@@ -71,7 +72,10 @@ def main(args):
         learning_rate=1e-3,
         save_strategy="epoch",
         fp16=True,
-        push_to_hub=False
+        push_to_hub=False,
+        metric_for_best_model='eval_loss',
+        load_best_model_at_end=True,
+        lr_scheduler_type=args.schedule
     )
 
     trainer = Trainer(
@@ -80,10 +84,14 @@ def main(args):
         args=args_training,
         data_collator=data_collator,
         train_dataset=tokenized_datasets["train"],
-        eval_dataset=tokenized_datasets["val"]
+        eval_dataset=tokenized_datasets["val"],
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
     )
 
     trainer.train()
+
+    best_ckpt_path = trainer.state.best_model_checkpoint
+    print(best_ckpt_path)
 
 
 if __name__ == '__main__':
@@ -94,6 +102,10 @@ if __name__ == '__main__':
                         help="seed", type=int)
     parser.add_argument("--output_path_model")
     parser.add_argument("--huggingface_model", default='')
+    parser.add_argument("--model_dir", default='')
     parser.add_argument("--is_pretrained", action='store_true')
+    parser.add_argument("--context_length", default=128,
+                        help="context_length", type=int)
+    parser.add_argument("--schedule", choices=["linear", "constant"])
     args = parser.parse_args()
     main(args)
