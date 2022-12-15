@@ -134,3 +134,7 @@ dmypy.json
 /distilgpt2-enfatic
 *.ipynb
 /gpt2-enfatic
+/dataset_line_level
+/dataset_token_level
+/runs
+/tokenizers

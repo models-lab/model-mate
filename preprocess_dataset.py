@@ -4,11 +4,11 @@ import re
 
 from sklearn.model_selection import train_test_split
 
-FULL_DATASET_NAME = 'modelset_full.txt'
+FULL_DATASET_NAME = 'dataset.txt'
 TRAIN_TXT = 'train.txt'
 TEST_TXT = 'test.txt'
 VAL_TXT = 'dev.txt'
-SPECIAL_TOKEN = "<STR_URI_PREFIX>"
+SPECIAL_TOKEN = "<URIPRE>"
 
 
 def main(args):
@@ -33,7 +33,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", default="./dataset",
+    parser.add_argument("--dataset", default="./dataset_token_level",
                         help="dataset path")
     parser.add_argument("--seed", default=123,
                         help="seed", type=int)

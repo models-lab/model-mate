@@ -6,14 +6,34 @@ conda env create --file=conda_venv.yml
 conda activate emfatic-gpt
 ```
 
-Train tokenizer:
+Download dataset:
 ```shell
-python train_tokenizer.py
+TO DO
 ```
 
-Train gpt:
+Preprocess dataset:
 ```shell
-python train_transformer.py --output_path_model test_gpt2_random --model_dir gpt2-enfatic --schedule constant
-python train_transformer.py --output_path_model test_java_gpt2 --huggingface_model microsoft/CodeGPT-small-java --schedule linear
-python train_transformer.py --output_path_model test_gpt2 --huggingface_model gpt2 --schedule linear
+python preprocess_dataset.py --dataset dataset_token_level
+python preprocess_dataset.py --dataset dataset_line_level
+```
+
+
+Train tokenizer:
+```shell
+python train_tokenizer.py --dataset dataset_token_level/ --level token
+python train_tokenizer.py --dataset dataset_line_level/ --level line
+```
+
+Train gpt token level:
+```shell
+python train_transformer.py --dataset dataset_token_level/ --output_path_model gpt2-token --huggingface_model gpt2 --is_pretrained
+python train_transformer.py --dataset dataset_token_level/ --output_path_model java-gpt2-token --huggingface_model microsoft/CodeGPT-small-java --is_pretrained
+python train_transformer.py --dataset dataset_token_level --output_path_model gpt2rand-token --model_dir tokenizers/tokenizer-enfatic-token/ --schedule constant
+```
+
+Train gpt line level:
+```shell
+python train_transformer.py --dataset dataset_line_level/ --output_path_model gpt2-line --huggingface_model gpt2 --is_pretrained
+python train_transformer.py --dataset dataset_line_level/ --output_path_model java-gpt2-line --huggingface_model microsoft/CodeGPT-small-java --is_pretrained
+python train_transformer.py --dataset dataset_line_level --output_path_model gpt2rand-line --model_dir tokenizers/tokenizer-enfatic-line/ --schedule constant
 ```
