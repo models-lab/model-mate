@@ -138,3 +138,8 @@ dmypy.json
 /dataset_token_level
 /runs
 /tokenizers
+/modelset_line_level/
+/modelset_token_level/
+/outputs
+/modelset_line/
+/modelset_token/

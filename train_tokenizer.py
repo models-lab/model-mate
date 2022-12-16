@@ -1,18 +1,17 @@
-import argparse
 import os.path
 
+import hydra
 from datasets import load_dataset
+from omegaconf import DictConfig
 from tokenizers.implementations import ByteLevelBPETokenizer
 from transformers import AutoConfig
 
-from preprocess_dataset import TRAIN_TXT
 
-TOKENIZER_FOLDER = 'tokenizers'
-
-
-def main(args):
-    model_dir = "tokenizer-enfatic" + f"-{args.level}"
-    dataset = load_dataset("text", data_files={"train": os.path.join(args.dataset, TRAIN_TXT)})["train"]
+@hydra.main(version_base=None, config_path="conf", config_name="config")
+def main(cfg: DictConfig):
+    model_dir = "tokenizer-enfatic" + f"-{cfg['dataset']['level']}"
+    dataset = load_dataset("text", data_files={"train": os.path.join(cfg['dataset']['path'],
+                                                                     cfg['run']['train_file'])})["train"]
     tokenizer = ByteLevelBPETokenizer()
     config = AutoConfig.from_pretrained("gpt2")
 
@@ -24,16 +23,9 @@ def main(args):
                                   vocab_size=config.vocab_size,
                                   min_frequency=2)
 
-    os.makedirs(os.path.join(TOKENIZER_FOLDER, model_dir), exist_ok=True)
-    tokenizer.save_model(os.path.join(TOKENIZER_FOLDER, model_dir))
+    os.makedirs(os.path.join(cfg['run']['tokenizers_folder'], model_dir), exist_ok=True)
+    tokenizer.save_model(os.path.join(cfg['run']['tokenizers_folder'], model_dir))
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", default="./dataset_token_level",
-                        help="dataset path")
-    parser.add_argument("--seed", default=123,
-                        help="seed", type=int)
-    parser.add_argument("--level", default="token", choices=["token", "line"])
-    args = parser.parse_args()
-    main(args)
+    main()

@@ -1,0 +1,5 @@
+is_pretrained: False
+hugging_face_model: gpt2
+model_name: gpt2rand
+local_tokenizer: True
+tokenizer_dir: tokenizer-enfatic
