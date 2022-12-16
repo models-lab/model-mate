@@ -28,10 +28,12 @@ Train gpt token level:
 ```shell
 python train_transformer.py dataset=modelset_token model=gpt2
 python train_transformer.py dataset=modelset_token model=gpt2rand
+python train_transformer.py dataset=modelset_token model=gpt2rand2 params.scheduler=constant
 ```
 
 Train gpt line level:
 ```shell
 python train_transformer.py dataset=modelset_line model=gpt2
-python train_transformer.py dataset=modelset_line model=gpt2rand params.scheduler=constant
+python train_transformer.py dataset=modelset_line model=gpt2rand params.scheduler=constant params.epochs=25
+python train_transformer.py dataset=modelset_line model=gpt2rand2 params.scheduler=constant params.epochs=25
 ```

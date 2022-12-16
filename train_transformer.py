@@ -119,7 +119,7 @@ def main(cfg: DictConfig):
 
     logger.info('Renaming the best model!')
     best_ckpt_path = trainer.state.best_model_checkpoint
-    parts = list(Path(best_ckpt_path).parts)[:-1] + [cfg['run']['best_model']]
+    parts = list(Path(best_ckpt_path).parts)[:-1] + [cfg['run']['best_model_folder']]
     new_path = os.path.join(*parts)
     os.rename(best_ckpt_path, new_path)
 
