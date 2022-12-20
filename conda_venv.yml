@@ -147,9 +147,6 @@ dependencies:
     - terminado==0.17.1
     - tinycss2==1.2.1
     - tokenizers==0.13.2
-    - torch==1.13.0+cu116
-    - torchaudio==0.13.0+cu116
-    - torchvision==0.14.0+cu116
     - tornado==6.2
     - tqdm==4.64.1
     - traitlets==5.7.0

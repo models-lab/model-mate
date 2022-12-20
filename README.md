@@ -4,6 +4,7 @@
 ```shell
 conda env create --file=conda_venv.yml
 conda activate emfatic-gpt
+# install pytorch
 ```
 
 Download datasets:
