@@ -58,6 +58,7 @@ with open(test_path, "r") as file, open(output_file, "w") as out_file:
                     pred.append(token)
                     break
 
+# borrar
             finalPred = " ".join(pred)
             print(input)
             print(finalPred)
