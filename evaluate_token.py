@@ -25,7 +25,7 @@ def main():
         gt = gt.split()
         assert len(pred) == len(gt), f"Sequence length of prediction and answer are not equal, {len(pred)}: {len(gt)}"
         for x, y in zip(pred, gt):
-            if y not in ["<s>", "</s>", "<EOL>", "<pad>", '[', ']', '{', '}', ';', 'class', 'extends']:
+            if y not in ["<s>", "</s>", "<EOL>", "<pad>"]:
                 total += 1
                 if x == y:
                     correct += 1

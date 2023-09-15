@@ -6,7 +6,7 @@ from transformers import GPT2LMHeadModel
 from transformers import pipeline
 
 # Path del modelo pre-entrenado.
-model_path = "./runs/gpt2-modelset_token-128/best_model"
+model_path = "./runs/gpt2-modelset_token-256/best_model"
 
 # Carga del modelo pre-entrenado.
 model = GPT2LMHeadModel.from_pretrained(model_path)
@@ -18,19 +18,19 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 # Creamos un pipeline con el tipo de tarea que vamos a resolver
 # y el path al modelo cargado.
 # max_new_tokens para generar siempre 1 token mas.
-generator = pipeline("text-generation", model=model_path, max_new_tokens=1)
+generator = pipeline("text-generation", model=model_path, max_new_tokens=1, handle_long_generation="hole")
 
 # Fichero donde guardamos las predicciones.
-#output_file = "predictions.txt"
-output_file = "alonePrediction.txt"
+output_file = "predictions.txt"
+#output_file = "alonePrediction.txt"
 
 # Fichero con el conjunto de test.
-#test_path = "./modelset_token/rawTest.txt"
-test_path = "alone.txt"
+test_path = "./modelset_token/test.txt"
+#test_path = "alone.txt"
 
 # Fichero reducido
-#file_path = "./test200.txt"
-file_path = "alone.txt"
+file_path = "./test200.txt"
+#file_path = "alone.txt"
 
 
 # Contador para saber por que frase vamos.
@@ -38,22 +38,10 @@ cnt = 0
 
 # Abrimos el conjunto de test y el fichero para las predicciones.
 # longitudes: [678, 1477]
-"""
-if False:
-    with open(test_path, "r") as file, open("test200.txt", "w") as test200:
-        for line in file:
-            tokens = line.split()
-            if (len(tokens) <= 200):
-                test200.write(line)
-"""
-
 with open(test_path, "r") as file, open(output_file, "w") as out_file:
     for line in file:
         cnt += 1
         tokens = line.split()
-        if(len(tokens)>200):
-            continue
-        prefix = ""
         out_tokens = "<s>"
         # Iteramos sobre todos los prefijos
         # (salvo la línea entera)
@@ -61,15 +49,7 @@ with open(test_path, "r") as file, open(output_file, "w") as out_file:
         print("Empiezan predicciones:" + str(len(words)))
         prefixes = [' '.join(words[:i + 1]) for i in range(len(words)-1)]
         stopped = False
-        try:
-            predictions = [generator(prefix, max_new_tokens = 1)[0]['generated_text'].strip() for prefix in prefixes]
-        except IndexError:
-            print("Error encontrado en la frase ", cnt)
-            stopped = True
-            break
-
-        if stopped:
-            continue
+        predictions = [generator(prefix, max_new_tokens = 1)[0]['generated_text'].strip() for prefix in prefixes]
 
         for prefix, prediction in zip(prefixes, predictions):
             if len(prefix.split()) == len(prediction.split()):

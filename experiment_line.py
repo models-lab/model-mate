@@ -7,7 +7,7 @@ from transformers import GPT2LMHeadModel
 from transformers import pipeline
 
 # Path del modelo pre-entrenado.
-model_path = "./runs/gpt2-modelset_token-128/best_model"
+model_path = "./runs/gpt2-modelset_line-256/best_model"
 
 # Carga del modelo pre-entrenado.
 model = GPT2LMHeadModel.from_pretrained(model_path)
@@ -18,7 +18,7 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 
 # Creamos un pipeline con el tipo de tarea que vamos a resolver
 # y el path al modelo cargado.
-generator = pipeline("text-generation", model=model_path, max_new_tokens=20)
+generator = pipeline("text-generation", model=model_path, max_new_tokens=20, handle_long_generation="hole")
 
 # Fichero donde guardamos las predicciones.
 output_file = "predictionsLine.txt"
