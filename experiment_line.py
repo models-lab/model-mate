@@ -68,3 +68,4 @@ with open(test_path, "r") as file, open(output_file, "w") as out_file:
 
         out_file.write(finalPred + '\n')
         print("terminada frase: " + str(cnt))
+# borrar
