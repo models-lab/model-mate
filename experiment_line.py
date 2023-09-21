@@ -18,6 +18,8 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 
 # Creamos un pipeline con el tipo de tarea que vamos a resolver
 # y el path al modelo cargado.
+# max_new_tokens = 20, se presupone que no hay mas de 20 tokens hasta el fin de linea
+# handle_long_generation = "hole" para que no haya problemas con lineas mayores de 1024 tokens, truncado automatico
 generator = pipeline("text-generation", model=model_path, max_new_tokens=20, handle_long_generation="hole")
 
 # Fichero donde guardamos las predicciones.
@@ -26,47 +28,40 @@ output_file = "predictionsLine.txt"
 # Fichero con el conjunto de test.
 test_path = "./modelset_line/test.json"
 
-# Fichero reducido
-#file_path = "./test200.txt"
-#file_path = "alone.txt"
-
-
 # Contador para saber por que frase vamos.
 cnt = 0
 
+# Tokens de fin de linea.
 end = [';', '}']
 
 # Abrimos el conjunto de test y el fichero para las predicciones.
-# longitudes: [678, 1477]
 with open(test_path, "r") as file, open(output_file, "w") as out_file:
     for line in file:
         cnt += 1
+        # Cargamos el input
         input = json.loads(line)["input"]
 
-        print("Empiezan predicciones:" + str(cnt))
-
+        #print("Empiezan predicciones:" + str(cnt))
         try:
+            # Predecimos
             prediction = generator(input)[0]['generated_text'].strip()
             pred = []
             inputTokens = input.split()
             for i,token in enumerate(prediction.split()):
+                # No tenemos en cuenta los tokens del input.
                 if i < len(inputTokens):
                     continue
+                # A partir de ahí, corto la predicción en el primer token de fin de línea.
                 if token not in end:
                     pred.append(token)
                 else:
                     pred.append(token)
                     break
 
-# borrar
             finalPred = " ".join(pred)
-            print(input)
-            print(finalPred)
         except IndexError:
             print("Error encontrado en la frase ", cnt)
             break
 
         out_file.write(finalPred + '\n')
         print("terminada frase: " + str(cnt))
-# borrar
-# borrar2

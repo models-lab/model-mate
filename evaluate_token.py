@@ -7,17 +7,20 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Evaluate leaderboard predictions for code completion (token level).')
-    parser.add_argument('--answers', '-a', required=True, help="filename of the labels, in txt format.")
+    parser = argparse.ArgumentParser(description='Evaluacion a nivel de token')
+    parser.add_argument('--answers', '-a', required=True, help="Respuestas correctas en txt")
     parser.add_argument('--predictions', '-p', required=True,
-                        help="filename of the leaderboard predictions, in txt format.")
+                        help="Predicciones en txt")
     args = parser.parse_args()
 
+    # Cargo las predicciones y las ground-truth
     preds = open(args.predictions, "r").readlines()
     gts = open(args.answers, "r").readlines()
 
-    assert len(preds) == len(gts), f"Samples of predictions and answers are not equal, {len(preds)}: {len(gts)}"
+    # Comprobacion para ver que tienen el mismo numero de lineas.
+    assert len(preds) == len(gts), f"No hay el mismo número de lineas en las predicciones y en las respuestas correctas", {len(preds)}: {len(gts)}"
 
+    # Calculo el accuracy. No se tienen en cuenta los tokens <s>, </s> ni <EOL>.
     total = 0
     correct = 0.0
     for pred, gt in zip(preds, gts):
@@ -25,12 +28,12 @@ def main():
         gt = gt.split()
         assert len(pred) == len(gt), f"Sequence length of prediction and answer are not equal, {len(pred)}: {len(gt)}"
         for x, y in zip(pred, gt):
-            if y not in ["<s>", "</s>", "<EOL>", "<pad>"]:
+            if y not in ["<s>", "</s>", "<EOL>"]:
                 total += 1
                 if x == y:
                     correct += 1
 
-    logger.info(f"Total {total} tokens, accuracy: {round(correct / total * 100, 2)}")
+    logger.info(f"Total: {total} tokens, accuracy: {round(correct / total * 100, 2)}")
 
 
 if __name__ == "__main__":
