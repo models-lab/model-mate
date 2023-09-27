@@ -3,7 +3,6 @@ import logging
 import argparse
 from fuzzywuzzy import fuzz
 import json
-import re
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

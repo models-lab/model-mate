@@ -1,7 +1,7 @@
 import json
 
 # Path con el test set (lineas completas).
-test_path = "./test200.txt"
+test_path = "./modelset_token/test.txt"
 
 # Palabras a partir de las cuales cortar los prefijos y predecir a partir de ellas.
 keywords = ["class", "attr", "ref", "extends", "package"]
