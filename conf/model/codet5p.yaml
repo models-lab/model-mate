@@ -1,0 +1,4 @@
+is_pretrained: True
+hugging_face_model: Salesforce/codet5p-220m
+model_name: codet5p
+local_tokenizer: False

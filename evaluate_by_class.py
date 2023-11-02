@@ -22,14 +22,21 @@ def main():
         total = 0
         correct = 0.0
         edit_sim = 0.0
+        mrr = 0
         for pred, gt in zip(preds, gts):
             gt = json.loads(gt)["gt"]
             total += 1
             edit_sim += fuzz.ratio(pred.strip(), gt.strip())
             if pred.strip() == gt.strip():
                 correct += 1
+            predList = pred.strip().split()
+            for i in range(5):
+                if predList[i] == gt:
+                    mrr += 1/(i+1)
+                    break
 
         logger.info(f"Type: {filename}, Total: {total} tokens, accuracy: {round(correct / total * 100, 2)}, Edit sim: {round(edit_sim/total, 2)}")
+        logger.info(f"MRR = {mrr / total}")
 
 
 if __name__ == "__main__":

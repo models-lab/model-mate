@@ -1,4 +1,3 @@
-import os
 import logging
 import argparse
 
@@ -18,8 +17,7 @@ def main():
     gts = open(args.answers, "r").readlines()
 
     # Comprobacion para ver que tienen el mismo numero de lineas.
-    assert len(preds) == len(gts), f"No hay el mismo número de lineas en las predicciones y en las respuestas correctas", {len(preds)}: {len(gts)}"
-
+    assert len(preds) == len(gts), f"No hay el mismo número de lineas en las predicciones y en las respuestas correctas: {len(preds)} vs {len(gts)}"
     # Calculo el accuracy. No se tienen en cuenta los tokens <s>, </s> ni <EOL>.
     total = 0
     correct = 0.0

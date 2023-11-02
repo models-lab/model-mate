@@ -115,6 +115,7 @@ def main(cfg: DictConfig):
         callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
     )
 
+
     trainer.train()
 
     logger.info('Renaming the best model!')

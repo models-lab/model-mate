@@ -9,7 +9,7 @@ from transformers import AutoConfig
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
-    model_dir = "tokenizer-enfatic" + f"-{cfg['dataset']['level']}"
+    model_dir = "tokenizer-emfatic" + f"-{cfg['dataset']['level']}"
     dataset = load_dataset("text", data_files={"train": os.path.join(cfg['dataset']['path'],
                                                                      cfg['run']['train_file'])})["train"]
     tokenizer = ByteLevelBPETokenizer()

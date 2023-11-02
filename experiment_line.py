@@ -20,10 +20,10 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 # y el path al modelo cargado.
 # max_new_tokens = 20, se presupone que no hay mas de 20 tokens hasta el fin de linea
 # handle_long_generation = "hole" para que no haya problemas con lineas mayores de 1024 tokens, truncado automatico
-generator = pipeline("text-generation", model=model_path, max_new_tokens=20, handle_long_generation="hole")
+generator = pipeline("text-generation", model=model_path, max_new_tokens=30, handle_long_generation="hole", device=0)
 
 # Fichero donde guardamos las predicciones.
-output_file = "predictionsLine.txt"
+output_file = "predictedLine/predictions.txt"
 
 # Fichero con el conjunto de test.
 test_path = "./modelset_line/test.json"
