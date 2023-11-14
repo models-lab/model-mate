@@ -1,4 +1,0 @@
-is_pretrained: True
-hugging_face_model: microsoft/CodeGPT-small-java
-model_name: codegpt-java
-local_tokenizer: False

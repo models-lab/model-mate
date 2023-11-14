@@ -1,0 +1,4 @@
+is_pretrained: True
+hugging_face_model: Salesforce/codegen-350M-mono
+model_name: Salesforce/codegen-350M-mono
+local_tokenizer: False

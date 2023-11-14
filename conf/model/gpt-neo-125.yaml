@@ -1,0 +1,4 @@
+is_pretrained: True
+hugging_face_model: EleutherAI/gpt-neo-125m
+model_name: EleutherAI/gpt-neo-125m
+local_tokenizer: False

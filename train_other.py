@@ -1,14 +1,13 @@
 import logging
 import os
 from pathlib import Path
-import torch
 
 import hydra
 from datasets import load_dataset
 from omegaconf import DictConfig
-from transformers import (T5ForConditionalGeneration, AutoTokenizer,
-                          DataCollatorForLanguageModeling, TrainingArguments, Trainer, GPT2LMHeadModel, \
-                          AutoConfig, EarlyStoppingCallback, GPT2TokenizerFast)
+from transformers import AutoTokenizer, DataCollatorForLanguageModeling, TrainingArguments, Trainer, \
+    AutoConfig, EarlyStoppingCallback, AutoModelForCausalLM, GPT2LMHeadModel, GPT2TokenizerFast
+import torch
 
 from preprocess_dataset import SPECIAL_TOKEN
 
@@ -16,7 +15,6 @@ EOL_TOKEN = '<EOL>'
 BOS_TOKEN = '<s>'
 EOS_TOKEN = '</s>'
 UNK_TOKEN = '<unk>'
-
 
 def check_tokens(tokenizer):
     for special in [SPECIAL_TOKEN, EOL_TOKEN, UNK_TOKEN, EOS_TOKEN, BOS_TOKEN]:
@@ -73,7 +71,7 @@ def main(cfg: DictConfig):
     data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
     if cfg['model']['is_pretrained']:
-        model = T5ForConditionalGeneration.from_pretrained(cfg['model']['hugging_face_model'])
+        model = AutoModelForCausalLM.from_pretrained(cfg['model']['hugging_face_model'])
         model.resize_token_embeddings(len(tokenizer))
     else:
         config = AutoConfig.from_pretrained(cfg['model']['hugging_face_model'],
@@ -116,6 +114,7 @@ def main(cfg: DictConfig):
         eval_dataset=tokenized_datasets["val"],
         callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
     )
+
 
     trainer.train()
 

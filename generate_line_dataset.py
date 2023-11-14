@@ -1,12 +1,12 @@
 import json
 
 # Path con el test set (lineas completas).
-test_path = "./modelset_token/test.txt"
+test_path = "./modelset_line/test.txt"
 
 # Palabras a partir de las cuales cortar los prefijos y predecir a partir de ellas.
 keywords = ["class", "attr", "ref", "extends", "package"]
 # Tokens que definen el fin de una linea.
-endline_words = ["}", ";", "</s>"]
+endline_words = ['<EOL>']
 
 with open(test_path, "r") as file, open("modelset_line/test.json", "w") as test:
     for line in file:
