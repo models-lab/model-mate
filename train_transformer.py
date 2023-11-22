@@ -93,7 +93,7 @@ def main(cfg: DictConfig):
         per_device_eval_batch_size=cfg['params']['batch_size'],
         evaluation_strategy="epoch",
         logging_strategy="epoch",
-        gradient_accumulation_steps=8,
+        gradient_accumulation_steps=16,
         num_train_epochs=cfg['params']['epochs'],
         weight_decay=0.1,
         learning_rate=1e-3,
