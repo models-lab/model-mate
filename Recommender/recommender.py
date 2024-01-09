@@ -58,7 +58,7 @@ class Recommender:
             print('Model not found')
             return f"Recommendation based on path: {self.path}"
 
-    def recommend_token(self, prefix):
+    def recommend_token2(self, prefix):
         assert self.type == 'token'
         logging.getLogger("transformers").setLevel(logging.ERROR)
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -66,11 +66,11 @@ class Recommender:
         generator = pipeline("text-generation", model=self.path, max_new_tokens=self.max_new_tokens,
                                  handle_long_generation="hole", device=0)
         generated_tokens = []
-        predictions = generator(pref, num_return_sequences=self.num_ret_seq)
+        predictions = generator(prefix, num_return_sequences=self.num_ret_seq)
         input_tokens = prefix.split()
         for j in range(self.num_ret_seq):
             pred = []
-            pred_tokens = prediction[j]['generated_text'].strip().split()
+            pred_tokens = predictions[j]['generated_text'].strip().split()
             if len(pred_tokens) > len(input_tokens):
                 pred.append(pred_tokens[len(input_tokens)])
             else:
@@ -120,39 +120,37 @@ class Recommender:
             print('Model not found')
             return f"Recommendation based on path: {self.path}"
 
-    def recommend_line(self, prefix):
+    def recommend_line2(self, prefix):
         assert self.type == 'line'
         logging.getLogger("transformers").setLevel(logging.ERROR)
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
+        end = ['<EOL>']
         generator = pipeline("text-generation", model=self.path, max_new_tokens=self.max_new_tokens,
                              handle_long_generation="hole", device=0)
         generated_lines = []
         input_tokens = prefix.split()
         predictions = generator(prefix, num_return_sequences=self.num_ret_seq)
-        for i, prediction in enumerate(predictions):
-            input_tokens = input[i].split()
-            for j in range(self.num_ret_seq):
-                pred = []
-                pred_tokens = prediction[j]['generated_text'].strip().split()
-                if len(pred_tokens) > len(input_tokens):
-                    pred.append(pred_tokens[len(input_tokens)])
+        for j in range(self.num_ret_seq):
+            pred = []
+            pred_tokens = predictions[j]['generated_text'].strip().split()
+
+            for token in predictions[len(input_tokens):]:
+                # We skip the tokens in the input and keep until the first end of line token.
+                if token not in end:
+                    pred.append(token)
                 else:
-                    pred.append('NO_PRED')
-                final_pred = " ".join(pred)
-                generated_tokens.append(final_pred)
+                    pred.append(token)
+                    break
 
-///////////////////########
-    for token in prediction.split()[len(input_tokens):]:
-        # We skip the tokens in the input and keep until the first end of line token.
-        if token not in end:
-            pred.append(token)
-        else:
-            pred.append(token)
-            break
 
-    final_pred = " ".join(pred)
-
+            if len(pred_tokens) > len(input_tokens):
+                pred.append(pred_tokens[len(input_tokens)])
+            else:
+                pred.append('NO_PRED')
+            final_pred = " ".join(pred)
+            generated_lines.append(final_pred)
+        return generated_lines
 
     def recommend_by_class(self):
         assert self.type == 'class'
