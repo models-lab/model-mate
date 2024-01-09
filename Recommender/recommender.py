@@ -58,7 +58,7 @@ class Recommender:
             print('Model not found')
             return f"Recommendation based on path: {self.path}"
 
-    def recommend_token(prefix):
+    def recommend_token(self, prefix):
         assert self.type == 'token'
         logging.getLogger("transformers").setLevel(logging.ERROR)
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -67,17 +67,17 @@ class Recommender:
                                  handle_long_generation="hole", device=0)
         generated_tokens = []
         predictions = generator(pref, num_return_sequences=self.num_ret_seq)
-        for i, prediction in enumerate(predictions):
-            input_tokens = input[i].split()
-            for j in range(self.num_ret_seq):
-                pred = []
-                pred_tokens = prediction[j]['generated_text'].strip().split()
-                if len(pred_tokens) > len(input_tokens):
-                    pred.append(pred_tokens[len(input_tokens)])
-                else:
-                    pred.append('NO_PRED')
-                final_pred = " ".join(pred)
-                generated_tokens.append(final_pred)
+        input_tokens = prefix.split()
+        for j in range(self.num_ret_seq):
+            pred = []
+            pred_tokens = prediction[j]['generated_text'].strip().split()
+            if len(pred_tokens) > len(input_tokens):
+                pred.append(pred_tokens[len(input_tokens)])
+            else:
+                pred.append('NO_PRED')
+            final_pred = " ".join(pred)
+            generated_tokens.append(final_pred)
+        return generated_tokens
 
     def recommend_line(self):
         assert self.type == 'line'
@@ -119,6 +119,40 @@ class Recommender:
         else:
             print('Model not found')
             return f"Recommendation based on path: {self.path}"
+
+    def recommend_line(self, prefix):
+        assert self.type == 'line'
+        logging.getLogger("transformers").setLevel(logging.ERROR)
+        device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+        generator = pipeline("text-generation", model=self.path, max_new_tokens=self.max_new_tokens,
+                             handle_long_generation="hole", device=0)
+        generated_lines = []
+        input_tokens = prefix.split()
+        predictions = generator(prefix, num_return_sequences=self.num_ret_seq)
+        for i, prediction in enumerate(predictions):
+            input_tokens = input[i].split()
+            for j in range(self.num_ret_seq):
+                pred = []
+                pred_tokens = prediction[j]['generated_text'].strip().split()
+                if len(pred_tokens) > len(input_tokens):
+                    pred.append(pred_tokens[len(input_tokens)])
+                else:
+                    pred.append('NO_PRED')
+                final_pred = " ".join(pred)
+                generated_tokens.append(final_pred)
+
+///////////////////########
+    for token in prediction.split()[len(input_tokens):]:
+        # We skip the tokens in the input and keep until the first end of line token.
+        if token not in end:
+            pred.append(token)
+        else:
+            pred.append(token)
+            break
+
+    final_pred = " ".join(pred)
+
 
     def recommend_by_class(self):
         assert self.type == 'class'
