@@ -143,7 +143,6 @@ class Recommender:
                     pred.append(token)
                     break
 
-
             if len(pred_tokens) > len(input_tokens):
                 pred.append(pred_tokens[len(input_tokens)])
             else:
