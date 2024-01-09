@@ -4,7 +4,7 @@ import json
 test_path = "./modelset_line/test.txt"
 
 # Palabras a partir de las cuales cortar los prefijos y predecir a partir de ellas.
-keywords = ["class", "attr", "ref", "extends", "package"]
+keywords = ["class", "attr", "ref", "extends", "package", "val"]
 # Tokens que definen el fin de una linea.
 endline_words = ['<EOL>']
 

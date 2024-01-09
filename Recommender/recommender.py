@@ -7,7 +7,7 @@ from tqdm import tqdm
 from fuzzywuzzy import fuzz
 
 class Recommender:
-    def __init__(self, model, type, test_path, output_file='predictions.txt', max_new_tokens=8, num_ret_seq = 1):
+    def __init__(self, model, type, test_path, output_file='predictions.txt', max_new_tokens=8, num_ret_seq = 1, mrr=1):
         self.model = model # name of the model that the recommender will use
         self.path = 'runs/' + model # the trained model will always be under the runs folder
         self.type = type # type of predictions
@@ -58,6 +58,26 @@ class Recommender:
             print('Model not found')
             return f"Recommendation based on path: {self.path}"
 
+    def recommend_token(prefix):
+        assert self.type == 'token'
+        logging.getLogger("transformers").setLevel(logging.ERROR)
+        device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+        generator = pipeline("text-generation", model=self.path, max_new_tokens=self.max_new_tokens,
+                                 handle_long_generation="hole", device=0)
+        generated_tokens = []
+        predictions = generator(pref, num_return_sequences=self.num_ret_seq)
+        for i, prediction in enumerate(predictions):
+            input_tokens = input[i].split()
+            for j in range(self.num_ret_seq):
+                pred = []
+                pred_tokens = prediction[j]['generated_text'].strip().split()
+                if len(pred_tokens) > len(input_tokens):
+                    pred.append(pred_tokens[len(input_tokens)])
+                else:
+                    pred.append('NO_PRED')
+                final_pred = " ".join(pred)
+                generated_tokens.append(final_pred)
 
     def recommend_line(self):
         assert self.type == 'line'
@@ -134,6 +154,7 @@ class Recommender:
             return f"Recommendation based on path: {self.path}"
 
     def evaluate_token(self):
+        print(self.model)
         logger = logging.getLogger("transformers")
         logger.setLevel(logging.INFO)
         preds = open(self.pred_path, "r").readlines()
@@ -151,9 +172,10 @@ class Recommender:
                     total += 1
                     if x == y:
                         correct += 1
-        logger.info(f"Total: {total} tokens, accuracy: {round(correct / total * 100, 2)}")
+        logger.info(f"Total: {total} tokens, accuracy: {round(correct / total * 100, 2)}\n")
 
     def evaluate_token_by_class(self):
+        print(self.model)
         logger = logging.getLogger("transformers")
         logger.setLevel(logging.INFO)
         preds = open(self.pred_path, "r").readlines()
@@ -169,19 +191,6 @@ class Recommender:
                 gt), f"Sequence length of prediction and answer are not equal, {len(pred)}: {len(gt)}"
             count_attr, count_class, count_extends, count_package, count_ref, count_val = 0, 0, 0, 0, 0, 0
             for x, y in zip(pred, gt):
-                if y == 'attr':
-                    count_attr = 1
-                elif y == 'class':
-                    count_class = 1
-                elif y == 'extends':
-                    count_extends = 1
-                elif y == 'package':
-                    count_package = 1
-                elif y == 'ref':
-                    count_ref = 1
-                elif y == 'val':
-                    count_val = 1
-
                 if count_attr:
                     count_attr = 0
                     total_attr += 1
@@ -211,13 +220,28 @@ class Recommender:
                     count_val = 0
                     total_val += 1
                     if x == y:
-                        ok_attr += 1
+                        ok_val += 1
+
+                if y == 'attr':
+                    count_attr = 1
+                elif y == 'class':
+                    count_class = 1
+                elif y == 'extends':
+                    count_extends = 1
+                elif y == 'package':
+                    count_package = 1
+                elif y == 'ref':
+                    count_ref = 1
+                elif y == 'val':
+                    count_val = 1
+
+
         logger.info(f"Total Attr: {total_attr} tokens, accuracy: {round(ok_attr / total_attr * 100, 2)}")
         logger.info(f"Total Class: {total_class} tokens, accuracy: {round(ok_class / total_class * 100, 2)}")
         logger.info(f"Total Extends: {total_extends} tokens, accuracy: {round(ok_extends / total_extends * 100, 2)}")
         logger.info(f"Total Package: {total_package} tokens, accuracy: {round(ok_package / total_package * 100, 2)}")
         logger.info(f"Total Ref: {total_ref} tokens, accuracy: {round(ok_ref / total_ref * 100, 2)}")
-        logger.info(f"Total Val: {total_val} tokens, accuracy: {round(ok_val / total_val * 100, 2)}")
+        logger.info(f"Total Val: {total_val} tokens, accuracy: {round(ok_val / total_val * 100, 2)}\n")
 
     def evaluate_line(self):
         logger = logging.getLogger("transformers")
@@ -237,12 +261,13 @@ class Recommender:
             edit_sim += fuzz.ratio(pred, gt)
             if pred.split() == gt.split():
                 em += 1
+        print(self.model)
+        logger.info(f"Edit sim: {round(edit_sim / total, 2)}, EM: {round(em / total * 100, 2)}\n")
 
-        logger.info(f"Edit sim: {round(edit_sim / total, 2)}, EM: {round(EM / total * 100, 2)}")
 
 
-
-    def mrr_by_class(self):
+    def mrr_by_class(self, rank = 1):
+        print(self.model)
         logger = logging.getLogger("transformers")
         logger.setLevel(logging.INFO)
         for filename in os.listdir(self.test_path):
@@ -262,11 +287,11 @@ class Recommender:
                 if pred.strip() == gt.strip():
                     correct += 1
                 pred_list = pred.strip().split()
-                for i in range(self.num_ret_seq):
+                for i in range(rank):
                     if pred_list[i] == gt:
                         mrr += 1 / (i + 1)
                         break
 
             logger.info(
-                f"Type: {filename}, Total: {total} tokens, accuracy: {round(correct / total * 100, 2)}, Edit sim: {round(edit_sim / total, 2)}")
-            logger.info(f"MRR = {mrr / total}")
+                f"Type: {filename}, Total: {total} tokens, MRR = {mrr / total}")
+        print('\n')

@@ -143,3 +143,6 @@ dmypy.json
 /outputs
 /modelset_line/
 /modelset_token/
+/token_*
+/line_*
+/class_*
