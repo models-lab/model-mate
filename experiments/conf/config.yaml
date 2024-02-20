@@ -1,0 +1,5 @@
+defaults:
+  - dataset: modelset_token
+  - run: default
+  - model: gpt2
+  - params: default

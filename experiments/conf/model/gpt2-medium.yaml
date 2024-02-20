@@ -1,0 +1,4 @@
+is_pretrained: True
+hugging_face_model: gpt2-medium
+model_name: gpt2-medium
+local_tokenizer: False

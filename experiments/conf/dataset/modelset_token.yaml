@@ -1,0 +1,4 @@
+level: token
+path: data/dataset/
+full_dataset: modelset-token-dedup.txt
+name: modelset_token

@@ -1,0 +1,7 @@
+seed: 123
+train_file: train.txt
+test_file: test.txt
+val_file: dev.txt
+models_folder: runs
+best_model_folder: best_model
+tokenizers_folder: tokenizers
