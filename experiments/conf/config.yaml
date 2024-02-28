@@ -3,3 +3,4 @@ defaults:
   - run: default
   - model: gpt2
   - params: default
+  - evaluation: noeval

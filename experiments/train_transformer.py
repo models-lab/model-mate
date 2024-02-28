@@ -8,6 +8,7 @@ from omegaconf import DictConfig
 from transformers import AutoTokenizer, DataCollatorForLanguageModeling, TrainingArguments, Trainer, GPT2LMHeadModel, \
     AutoConfig, EarlyStoppingCallback, GPT2TokenizerFast
 
+import common
 from preprocess_dataset import SPECIAL_TOKEN
 
 EOL_TOKEN = '<EOL>'
@@ -27,9 +28,11 @@ def check_tokens(tokenizer):
 def main(cfg: DictConfig):
     logger = logging.getLogger()
 
-    dataset = load_dataset("text", data_files={"train": os.path.join(cfg['dataset']['path'], cfg['run']['train_file']),
-                                               "test": os.path.join(cfg['dataset']['path'], cfg['run']['test_file']),
-                                               "val": os.path.join(cfg['dataset']['path'], cfg['run']['val_file'])})
+    train_data_folder = common.get_train_data_folder(cfg)
+
+    dataset = load_dataset("text", data_files={"train": os.path.join(train_data_folder, cfg['run']['train_file']),
+                                               "test": os.path.join(train_data_folder, cfg['run']['test_file']),
+                                               "val": os.path.join(train_data_folder, cfg['run']['val_file'])})
     if not cfg['model']['local_tokenizer']:
         tokenizer = AutoTokenizer.from_pretrained(cfg['model']['hugging_face_model'], bos_token=BOS_TOKEN,
                                                   eos_token=EOS_TOKEN, pad_token=EOS_TOKEN,
@@ -84,9 +87,8 @@ def main(cfg: DictConfig):
 
     logger.info(f'Checking input embeddings: {model.transformer.wte.weight.shape[0]}, {len(tokenizer)}')
 
-    output_dir = os.path.join(cfg['run']['models_folder'], f"{cfg['model']['model_name']}-"
-                                                           f"{cfg['dataset']['name']}-"
-                                                           f"{context_length}")
+    output_dir = common.get_trained_model_folder(cfg)
+
     args_training = TrainingArguments(
         output_dir=output_dir,
         per_device_train_batch_size=cfg['params']['batch_size'],

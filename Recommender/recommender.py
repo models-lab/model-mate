@@ -7,18 +7,20 @@ from tqdm import tqdm
 from fuzzywuzzy import fuzz
 
 class Recommender:
-    def __init__(self, model, type, test_path, output_file='predictions.txt', max_new_tokens=8, num_ret_seq = 1, mrr=1):
+    def __init__(self, model, type, test_path, pred_path, max_new_tokens=8, num_ret_seq = 1, mrr=1):
         self.model = model # name of the model that the recommender will use
-        self.path = 'runs/' + model # the trained model will always be under the runs folder
+        self.path = model #'runs/' + model # the trained model will always be under the runs folder
         self.type = type # type of predictions
         self.test_path = test_path # where is the test set
-        if(len(model.split('/')) <= 2):
-            self.pred_dir = self.type + '_' + model.split('/')[0]  # dir where predictions are saved
-            self.pred_path = self.type + '_' + model.split('/')[0] + '/' + output_file  # full path of the predictions (if they're in just one file)
-        else:
-            self.pred_dir = self.type + '_' + model.split('/')[1]  # dir where predictions are saved
-            self.pred_path = self.type + '_' + model.split('/')[1] + '/' + output_file  # full path of the predictions (if they're in just one file)
-        self.output_file = output_file  # name of the file where predictions are saved
+
+        self.pred_path = pred_path
+        #if(len(model.split('/')) <= 2):
+        #    self.pred_dir = self.type + '_' + model.split('/')[0]  # dir where predictions are saved
+        #    self.pred_path = self.type + '_' + model.split('/')[0] + '/' + output_file  # full path of the predictions (if they're in just one file)
+        #else:
+        #    self.pred_dir = self.type + '_' + model.split('/')[1]  # dir where predictions are saved
+        #    self.pred_path = self.type + '_' + model.split('/')[1] + '/' + output_file  # full path of the predictions (if they're in just one file)
+        #self.output_file = output_file  # name of the file where predictions are saved
         self.max_new_tokens = max_new_tokens # tokens to predict
         self.num_ret_seq = num_ret_seq # number of different predictions
 
@@ -27,9 +29,9 @@ class Recommender:
         logging.getLogger("transformers").setLevel(logging.ERROR)
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-        pred_dir = self.pred_dir
-        if not os.path.exists(pred_dir):
-            os.makedirs(pred_dir)
+        #pred_dir = self.pred_dir
+        #if not os.path.exists(pred_dir):
+        #    os.makedirs(pred_dir)
 
         if True:
             generator = pipeline("text-generation", model=self.path, max_new_tokens=self.max_new_tokens,
@@ -84,9 +86,9 @@ class Recommender:
         logger = logging.getLogger("transformers").setLevel(logging.ERROR)
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-        pred_dir = self.pred_dir
-        if not os.path.exists(pred_dir):
-            os.makedirs(pred_dir)
+        #pred_dir = self.pred_dir
+        #if not os.path.exists(pred_dir):
+        #   os.makedirs(pred_dir)
 
         # Set of tokens that indicate the end of a line.
         end = ['<EOL>']
@@ -156,9 +158,9 @@ class Recommender:
         logging.getLogger("transformers").setLevel(logging.ERROR)
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-        pred_dir = self.pred_dir
-        if not os.path.exists(pred_dir):
-            os.makedirs(pred_dir)
+        #pred_dir = self.pred_dir
+        #if not os.path.exists(pred_dir):
+        #    os.makedirs(pred_dir)
 
         if True:
             generator = pipeline("text-generation", model=self.path, max_new_tokens=self.max_new_tokens,

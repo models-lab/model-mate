@@ -23,9 +23,12 @@ def main(cfg: DictConfig):
     train_val, test = train_test_split(new_contents, test_size=0.20, random_state=cfg['run']['seed'])
     train, val = train_test_split(train_val, test_size=0.1 / 0.8, random_state=cfg['run']['seed'])
 
-    for filename, filecontent in zip([os.path.join(cfg['dataset']['path'], cfg['run']['train_file']),
-                                      os.path.join(cfg['dataset']['path'], cfg['run']['val_file']),
-                                      os.path.join(cfg['dataset']['path'], cfg['run']['test_file'])],
+    train_data_folder = common.get_train_data_folder(cfg)
+    os.makedirs(train_data_folder, exist_ok=True)
+
+    for filename, filecontent in zip([os.path.join(train_data_folder, cfg['run']['train_file']),
+                                      os.path.join(train_data_folder, cfg['run']['val_file']),
+                                      os.path.join(train_data_folder, cfg['run']['test_file'])],
                                      [train, val, test]):
         with open(filename, "a") as f:
             f.writelines(filecontent)
