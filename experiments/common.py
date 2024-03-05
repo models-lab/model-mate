@@ -9,6 +9,7 @@ def get_trained_model_id(cfg):
 def get_trained_model_folder(cfg):
     return os.path.join(cfg['run']['models_folder'], get_trained_model_id(cfg))
 
+
 def get_train_data_folder(cfg):
     return os.path.join(cfg.run.train_data_folder, cfg.dataset.name)
 

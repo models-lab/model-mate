@@ -6,7 +6,7 @@ import hydra
 from datasets import load_dataset
 from omegaconf import DictConfig
 from transformers import AutoTokenizer, DataCollatorForLanguageModeling, TrainingArguments, Trainer, GPT2LMHeadModel, \
-    AutoConfig, EarlyStoppingCallback, GPT2TokenizerFast
+    AutoConfig, EarlyStoppingCallback, GPT2TokenizerFast, AutoModelForCausalLM
 
 import common
 from preprocess_dataset import SPECIAL_TOKEN
@@ -74,7 +74,7 @@ def main(cfg: DictConfig):
     data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
     if cfg['model']['is_pretrained']:
-        model = GPT2LMHeadModel.from_pretrained(cfg['model']['hugging_face_model'])
+        model = AutoModelForCausalLM.from_pretrained(cfg['model']['hugging_face_model'])
         model.resize_token_embeddings(len(tokenizer))
     else:
         config = AutoConfig.from_pretrained(cfg['model']['hugging_face_model'],
@@ -116,7 +116,6 @@ def main(cfg: DictConfig):
         eval_dataset=tokenized_datasets["val"],
         callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
     )
-
 
     trainer.train()
 
