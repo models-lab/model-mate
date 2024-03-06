@@ -17,10 +17,11 @@ class EndOfFunctionCriteriaToken(StoppingCriteria):
 
     def __call__(self, input_ids, scores, **kwargs):
         decoded_generations = self.tokenizer.batch_decode(input_ids[:, self.start_length:])
-        done = []
         for decoded_generation in decoded_generations:
-            done.append(decoded_generation.count(' ') > 1)
-        return all(done)
+            if decoded_generation.count(' ') > 1:
+                return False
+        return True
+
 
 
 SEP = '<>'
