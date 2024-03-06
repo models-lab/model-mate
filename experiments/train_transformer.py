@@ -85,7 +85,7 @@ def main(cfg: DictConfig):
         model = GPT2LMHeadModel(config)
         model.resize_token_embeddings(len(tokenizer))
 
-    logger.info(f'Checking input embeddings: {model.transformer.wte.weight.shape[0]}, {len(tokenizer)}')
+    # logger.info(f'Checking input embeddings: {model.transformer.wte.weight.shape[0]}, {len(tokenizer)}')
 
     output_dir = common.get_trained_model_folder(cfg)
 
@@ -104,7 +104,8 @@ def main(cfg: DictConfig):
         push_to_hub=False,
         metric_for_best_model='eval_loss',
         load_best_model_at_end=True,
-        lr_scheduler_type=cfg['params']['scheduler']
+        lr_scheduler_type=cfg['params']['scheduler'],
+        save_total_limit=2
     )
 
     trainer = Trainer(
