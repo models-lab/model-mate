@@ -1,0 +1,4 @@
+level: token
+path: data/dataset/
+full_dataset: xtext-mar-dedup.txt
+name: xtext_mar_token

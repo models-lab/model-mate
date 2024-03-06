@@ -1,3 +1,4 @@
+import logging
 import os.path
 import re
 
@@ -8,6 +9,8 @@ from sklearn.model_selection import train_test_split
 import common
 
 SPECIAL_TOKEN = "<URIPRE>"
+
+logger = logging.getLogger()
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -34,6 +37,8 @@ def main(cfg: DictConfig):
                                      [train, val, test]):
         with open(filename, "a") as f:
             f.writelines(filecontent)
+
+        logger.info(f"Output written to: {filename}")
 
 
 if __name__ == '__main__':
