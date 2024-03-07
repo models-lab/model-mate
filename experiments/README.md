@@ -62,5 +62,5 @@ python report_results.py
 Token:
 ```shell
 python run_inference.py --mode token --n 5 --parsed_test data/temp/modelset_token/test_parsed_token.json --results data/temp/modelset_token/results_token_gpt2.csv
-python report_results.py --mode token --results data/temp/modelset_token/results_token_gpt2.csv
+python report_results.py --mode token --results data/temp/modelset_token/results_token_gpt2-medium.csv
 ```

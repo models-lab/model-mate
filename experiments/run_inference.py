@@ -18,11 +18,25 @@ class EndOfFunctionCriteriaToken(StoppingCriteria):
     def __call__(self, input_ids, scores, **kwargs):
         decoded_generations = self.tokenizer.batch_decode(input_ids[:, self.start_length:])
         for decoded_generation in decoded_generations:
-            if decoded_generation.count(' ') > 1:
+            if decoded_generation.count(' ') <= 1:
                 return False
         return True
 
 
+
+class EndOfFunctionCriteriaLine(StoppingCriteria):
+
+    def __init__(self, tokenizer, start_length=0):
+        self.tokenizer = tokenizer
+        self.start_length = start_length
+
+    def __call__(self, input_ids, scores, **kwargs):
+        decoded_generations = self.tokenizer.batch_decode(input_ids[:, self.start_length:])
+        for decoded_generation in decoded_generations:
+            dec_split = decoded_generation.split()
+            if('<EOL>' not in dec_split):
+                return False
+        return True
 
 SEP = '<>'
 
@@ -50,9 +64,36 @@ def get_suggestions_next_token(model, tokenizer, input, args):
     suggestions = []
     for k, new_tokens in enumerate(generated_new_tokens):
         generated = tokenizer.decode(new_tokens, skip_special_tokens=True)
-        suggestions.append(generated.split(' ')[1])
+        gsplit = generated.split(' ')
+        if(len(gsplit) >= 2):
+            suggestions.append(generated.split(' ')[1])
     return suggestions
 
+def get_suggestions_next_line(model, tokenizer, input, args):
+    sample = tokenizer([input], return_tensors="pt")
+    sample["input_ids"] = sample["input_ids"][:, -(args.max_length - args.max_new_tokens):]
+    sample["attention_mask"] = sample["attention_mask"][:, -(args.max_length - args.max_new_tokens):]
+    with torch.no_grad():
+        criteria = EndOfFunctionCriteriaLine(tokenizer, sample["input_ids"].shape[1])
+        generated_sequences = model.generate(
+            input_ids=sample["input_ids"].cuda(),
+            attention_mask=sample["attention_mask"].cuda(),
+            do_sample=False,
+            max_new_tokens=args.max_new_tokens,
+            num_return_sequences=args.n,
+            pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            num_beams=args.n,
+            stopping_criteria=StoppingCriteriaList([criteria])
+        )
+    generated_sequences = generated_sequences.cpu().numpy()
+    generated_new_tokens = generated_sequences[:, sample["input_ids"].shape[1]:]
+
+    suggestions = []
+    for k, new_tokens in enumerate(generated_new_tokens):
+        generated = tokenizer.decode(new_tokens, skip_special_tokens=True)
+        suggestions.append(generated)
+    return suggestions
 
 def main(args):
     with open(args.parsed_test) as f:
@@ -91,6 +132,17 @@ def main(args):
             final_output["input"].append(input)
             final_output["expected"].append(expected)
             final_output["suggestions"].append(SEP.join(suggestions))
+    elif args.mode == 'line':
+        final_output = {
+            "input": [],
+            "expected": [],
+            "suggestions": []
+        }
+        for input, expected in tqdm(parsed_test, desc=f'Inference'):
+            suggestions = get_suggestions_next_line(model, tokenizer, input, args)
+            final_output["input"].append(input)
+            final_output["expected"].append(expected)
+            final_output["suggestions"].append(suggestions)
     else:
         raise ValueError('Not supported')
 
