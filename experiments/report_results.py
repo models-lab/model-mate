@@ -31,8 +31,12 @@ def main(args):
 
     elif args.mode == 'token':
         hits = 0
-        for _, row in results.iterrows():
+        for idx, row in results.iterrows():
             expected = row["expected"]
+            if type(row["suggestions"]) is not str:
+                print(idx, row["suggestions"])    
+                continue
+            
             suggestions = row["suggestions"].split(SEP)
             if expected.lower() == suggestions[0].lower():
                 hits += 1
