@@ -7,3 +7,4 @@ train_data_folder: data/temp
 models_folder: runs
 best_model_folder: best_model
 tokenizers_folder: tokenizers
+replacements: []
