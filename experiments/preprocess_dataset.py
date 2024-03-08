@@ -17,12 +17,16 @@ logger = logging.getLogger()
 def main(cfg: DictConfig):
     with open(os.path.join(cfg['dataset']['path'], cfg['dataset']['full_dataset'])) as f:
         contents = f.readlines()
-    new_contents = []
-    for metamodel in contents:
-        new_metamodel = re.sub('"([^"]*)"', SPECIAL_TOKEN, metamodel)
-        if new_metamodel[0] == ' ':
-            new_metamodel = new_metamodel[1:]
-        new_contents.append(new_metamodel)
+    new_contents = contents
+
+    # TODO: Configure in run/default.yaml
+    if False:
+        new_contents = []
+        for metamodel in contents:
+            new_metamodel = re.sub('"([^"]*)"', SPECIAL_TOKEN, metamodel)
+            if new_metamodel[0] == ' ':
+                new_metamodel = new_metamodel[1:]
+            new_contents.append(new_metamodel)
 
     # Splitting dataset 70/20/10
     train_val, test = train_test_split(new_contents, test_size=0.20, random_state=cfg['run']['seed'])
