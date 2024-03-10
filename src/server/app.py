@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 
 from inference import TokenInference
 
+import time
 
 class FlaskModelMateApp:
     def __init__(self, token_model: TokenInference, app: Flask = None):
@@ -19,10 +20,15 @@ class FlaskModelMateApp:
             text = data['context'].strip()
             # type_ = data.get('type', 'token')
 
+            start = time.time()
             fragment = self.token_model.generate_fragment(text)
-            str = "".join(fragment)
+            end = time.time()
 
-            return jsonify({"fragment": str})
+            print(f"Time: {end - start}")
+            print(fragment)
+
+            text = " ".join(fragment)
+            return jsonify({"fragment": fragment, "time": end - start, "text": text})
 
     def run(self):
         self.app.run(host='0.0.0.0', port=8080)
