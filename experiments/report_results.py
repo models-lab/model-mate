@@ -1,4 +1,5 @@
 import argparse
+import os.path
 
 import numpy as np
 import pandas as pd
@@ -8,8 +9,8 @@ from run_inference import SEP
 from fuzzywuzzy import fuzz
 
 
-def main(args):
-    results = pd.read_csv(args.results)
+def compute_single_result(args, result_file):
+    results = pd.read_csv(result_file)
     if args.mode == 'token-id':
 
         for kw in KEYWORDS:
@@ -34,14 +35,15 @@ def main(args):
         for idx, row in results.iterrows():
             expected = row["expected"]
             if type(row["suggestions"]) is not str:
-                print(idx, row["suggestions"])    
+                print(idx, row["suggestions"])
                 continue
-            
+
             suggestions = row["suggestions"].split(SEP)
             if expected.lower() == suggestions[0].lower():
                 hits += 1
-        print(f'Accuracy: {(hits/len(results)) * 100:.2f}')
-
+        accuracy = (hits / len(results)) * 100
+        print(f'Accuracy: {accuracy:.2f}')
+        return {'accuracy': accuracy}
     elif args.mode == 'line':
         hits = 0
         edit_sim = 0.0
@@ -66,7 +68,39 @@ def main(args):
     #       if pred.split() == gt.split():
     #           em += 1
     #   print(self.model)
+
+
 #   logger.info(f"Edit sim: {round(edit_sim / total, 2)}, EM: {round(em / total * 100, 2)}\n")
+
+
+def compute_several_results(args, result_folder):
+    from os import listdir
+    from os.path import isfile, join
+
+    files = [join(result_folder, f) for f in listdir(result_folder) if isfile(join(result_folder, f))]
+
+    rows = []
+    for f in files:
+        print(f)
+        if not f.endswith('csv'):
+            continue
+
+        print("Processing ", f)
+        result = compute_single_result(args, f)
+        result['name'] = os.path.basename(f)
+        rows.append(result)
+
+    import pandas as pd
+    df = pd.DataFrame(rows)
+    print(df)
+
+
+def main(args):
+    if os.path.isdir(args.results):
+        compute_several_results(args, args.results)
+    else:
+        compute_single_result(args, args.results)
+
 
 
 
