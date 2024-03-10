@@ -140,6 +140,7 @@ def main(args):
         }
         for input, expected in tqdm(parsed_test, desc=f'Inference'):
             suggestions = get_suggestions_next_line(model, tokenizer, input, args)
+            print(suggestions)
             final_output["input"].append(input)
             final_output["expected"].append(expected)
             final_output["suggestions"].append(suggestions)
