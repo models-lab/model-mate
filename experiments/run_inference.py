@@ -1,15 +1,20 @@
-import argparse
 import json
+import logging
+import os
 
+import hydra
 import pandas as pd
 import torch
+from omegaconf import DictConfig
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForCausalLM, StoppingCriteria, StoppingCriteriaList
 
+import common
+from train_transformer import EOL_TOKEN
 from parse_test_dataset import KEYWORDS
 
 
-class EndOfFunctionCriteriaToken(StoppingCriteria):
+class CriteriaToken(StoppingCriteria):
 
     def __init__(self, tokenizer, start_length=0):
         self.tokenizer = tokenizer
@@ -23,8 +28,7 @@ class EndOfFunctionCriteriaToken(StoppingCriteria):
         return True
 
 
-
-class EndOfFunctionCriteriaLine(StoppingCriteria):
+class CriteriaLine(StoppingCriteria):
 
     def __init__(self, tokenizer, start_length=0):
         self.tokenizer = tokenizer
@@ -34,75 +38,97 @@ class EndOfFunctionCriteriaLine(StoppingCriteria):
         decoded_generations = self.tokenizer.batch_decode(input_ids[:, self.start_length:])
         for decoded_generation in decoded_generations:
             dec_split = decoded_generation.split()
-            if('<EOL>' not in dec_split):
+            if '<EOL>' not in dec_split:
                 return False
         return True
+
 
 SEP = '<>'
 
 
-def get_suggestions_next_token(model, tokenizer, input, args):
+def generate(model, tokenizer, input, cfg, criteria=CriteriaToken, end_token=None):
     sample = tokenizer([input], return_tensors="pt")
-    sample["input_ids"] = sample["input_ids"][:, -(args.max_length - args.max_new_tokens):]
-    sample["attention_mask"] = sample["attention_mask"][:, -(args.max_length - args.max_new_tokens):]
+    sample["input_ids"] = sample["input_ids"][:,
+                          -(cfg['params']['context_length'] - cfg['evaluation']['max_new_tokens']):]
+    sample["attention_mask"] = sample["attention_mask"][:,
+                               -(cfg['params']['context_length'] - cfg['evaluation']['max_new_tokens']):]
     with torch.no_grad():
-        criteria = EndOfFunctionCriteriaToken(tokenizer, sample["input_ids"].shape[1])
-        generated_sequences = model.generate(
-            input_ids=sample["input_ids"].cuda(),
-            attention_mask=sample["attention_mask"].cuda(),
-            do_sample=False,
-            max_new_tokens=args.max_new_tokens,
-            num_return_sequences=args.n,
-            pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=tokenizer.eos_token_id,
-            num_beams=args.n,
-            stopping_criteria=StoppingCriteriaList([criteria])
-        )
+        if criteria:
+            criteria = criteria(tokenizer, sample["input_ids"].shape[1])
+            generated_sequences = model.generate(
+                input_ids=sample["input_ids"].cuda(),
+                attention_mask=sample["attention_mask"].cuda(),
+                do_sample=False,
+                max_new_tokens=cfg['evaluation']['max_new_tokens'],
+                num_return_sequences=cfg['evaluation']['num_beams'],
+                pad_token_id=tokenizer.eos_token_id,
+                eos_token_id=tokenizer.eos_token_id,
+                num_beams=cfg['evaluation']['num_beams'],
+                stopping_criteria=StoppingCriteriaList([criteria])
+            )
+        else:
+            generated_sequences = model.generate(
+                input_ids=sample["input_ids"].cuda(),
+                attention_mask=sample["attention_mask"].cuda(),
+                do_sample=False,
+                max_new_tokens=cfg['evaluation']['max_new_tokens'],
+                num_return_sequences=cfg['evaluation']['num_beams'],
+                pad_token_id=tokenizer.eos_token_id,
+                eos_token_id=tokenizer.convert_tokens_to_ids(end_token),
+                num_beams=cfg['evaluation']['num_beams']
+            )
     generated_sequences = generated_sequences.cpu().numpy()
     generated_new_tokens = generated_sequences[:, sample["input_ids"].shape[1]:]
+    return generated_new_tokens
+
+
+def get_suggestions_next_token(model, tokenizer, input, cfg):
+    generated_new_tokens = generate(model, tokenizer, input, cfg)
 
     suggestions = []
     for k, new_tokens in enumerate(generated_new_tokens):
         generated = tokenizer.decode(new_tokens, skip_special_tokens=True)
         gsplit = generated.split(' ')
-        if(len(gsplit) >= 2):
+        if len(gsplit) >= 2:
             suggestions.append(generated.split(' ')[1])
     return suggestions
 
-def get_suggestions_next_line(model, tokenizer, input, args):
-    sample = tokenizer([input], return_tensors="pt")
-    sample["input_ids"] = sample["input_ids"][:, -(args.max_length - args.max_new_tokens):]
-    sample["attention_mask"] = sample["attention_mask"][:, -(args.max_length - args.max_new_tokens):]
-    with torch.no_grad():
-        criteria = EndOfFunctionCriteriaLine(tokenizer, sample["input_ids"].shape[1])
-        generated_sequences = model.generate(
-            input_ids=sample["input_ids"].cuda(),
-            attention_mask=sample["attention_mask"].cuda(),
-            do_sample=False,
-            max_new_tokens=args.max_new_tokens,
-            num_return_sequences=args.n,
-            pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=tokenizer.eos_token_id,
-            num_beams=args.n,
-            stopping_criteria=StoppingCriteriaList([criteria])
-        )
-    generated_sequences = generated_sequences.cpu().numpy()
-    generated_new_tokens = generated_sequences[:, sample["input_ids"].shape[1]:]
+
+def get_suggestions_next_line(model, tokenizer, input, cfg):
+    generated_new_tokens = generate(model, tokenizer, input, cfg, None, EOL_TOKEN)
 
     suggestions = []
     for k, new_tokens in enumerate(generated_new_tokens):
-        generated = tokenizer.decode(new_tokens, skip_special_tokens=True)
+        generated = tokenizer.decode(new_tokens, skip_special_tokens=True).split(EOL_TOKEN)[0].strip()
         suggestions.append(generated)
     return suggestions
 
-def main(args):
-    with open(args.parsed_test) as f:
+
+def get_suggestions_next_block(model, tokenizer, input, cfg):
+    generated_new_tokens = generate(model, tokenizer, input, cfg, None, 'Ġ}')
+
+    suggestions = []
+    for k, new_tokens in enumerate(generated_new_tokens):
+        generated = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
+        suggestions.append(generated)
+    return suggestions
+
+
+@hydra.main(version_base=None, config_path="conf", config_name="config")
+def main(cfg: DictConfig):
+    logging.getLogger().info(f"Running inference mode={cfg['evaluation']['mode']}")
+
+    train_data_folder = common.get_train_data_folder(cfg)
+    with open(os.path.join(train_data_folder, f"parsed_test_{cfg['evaluation']['mode']}.json")) as f:
         parsed_test = json.load(f)
 
-    model = AutoModelForCausalLM.from_pretrained(args.checkpoint, device_map="auto")
-    tokenizer = AutoTokenizer.from_pretrained(args.checkpoint)
+    model = AutoModelForCausalLM.from_pretrained(os.path.join(common.get_trained_model_folder(cfg),
+                                                              cfg['run']['best_model_folder']),
+                                                 device_map="auto")
+    tokenizer = AutoTokenizer.from_pretrained(os.path.join(common.get_trained_model_folder(cfg),
+                                                           cfg['run']['best_model_folder']))
 
-    if args.mode == 'token-id':
+    if cfg['evaluation']['mode'] == 'token-id':
         final_output = {
             "input": [],
             "expected": [],
@@ -111,7 +137,7 @@ def main(args):
         }
         for kw in KEYWORDS:
             for input, expected in tqdm(parsed_test[kw], desc=f'KW {kw}'):
-                suggestions = get_suggestions_next_token(model, tokenizer, input, args)
+                suggestions = get_suggestions_next_token(model, tokenizer, input, cfg)
                 # suggestions = list(OrderedDict.fromkeys(suggestions))
                 # print(suggestions, expected)
 
@@ -120,45 +146,39 @@ def main(args):
                 final_output["suggestions"].append(SEP.join(suggestions))
                 final_output["keyword"].append(kw)
 
-    elif args.mode == 'token':
+    elif cfg['evaluation']['mode'] == 'token':
         final_output = {
             "input": [],
             "expected": [],
             "suggestions": []
         }
         for input, expected in tqdm(parsed_test, desc=f'Inference'):
-            suggestions = get_suggestions_next_token(model, tokenizer, input, args)
+            suggestions = get_suggestions_next_token(model, tokenizer, input, cfg)
             # print(suggestions, expected)
             final_output["input"].append(input)
             final_output["expected"].append(expected)
             final_output["suggestions"].append(SEP.join(suggestions))
-    elif args.mode == 'line':
+    elif cfg['evaluation']['mode'] == 'line' or cfg['evaluation']['mode'] == 'block':
         final_output = {
             "input": [],
             "expected": [],
             "suggestions": []
         }
+        get_suggestions = get_suggestions_next_line \
+            if cfg['evaluation']['mode'] == 'line' else get_suggestions_next_block
+
         for input, expected in tqdm(parsed_test, desc=f'Inference'):
-            suggestions = get_suggestions_next_line(model, tokenizer, input, args)
+            suggestions = get_suggestions(model, tokenizer, input, cfg)
             final_output["input"].append(input)
             final_output["expected"].append(expected)
-            final_output["suggestions"].append(suggestions)
+            final_output["suggestions"].append(SEP.join(suggestions))
+            # print(suggestions, '---', expected)
     else:
         raise ValueError('Not supported')
 
     pd_results = pd.DataFrame.from_dict(final_output)
-    pd_results.to_csv(args.results)
+    pd_results.to_csv(os.path.join(train_data_folder, f"results_{cfg['evaluation']['mode']}.csv"))
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Parse dataset')
-    parser.add_argument('--mode', type=str, default='token-id', choices=['token', 'line', 'token-id'])
-    parser.add_argument('--n', type=int, default=5)
-    parser.add_argument('--seed', type=int, default=123)
-    parser.add_argument('--max_length', type=int, default=512)
-    parser.add_argument('--max_new_tokens', type=int, default=10)
-    parser.add_argument('--parsed_test', default='data/temp/modelset_token/test_parsed_token-id.json')
-    parser.add_argument('--checkpoint', default='runs/gpt2-modelset_token-512/best_model')
-    parser.add_argument('--results', default='data/temp/modelset_token/results_token-id_gpt2.csv')
-    args = parser.parse_args()
-    main(args)
+    main()

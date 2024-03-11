@@ -15,25 +15,32 @@ Download datasets:
 
 Preprocess dataset:
 ```shell
-python preprocess_dataset.py dataset=modelset_token
 python preprocess_dataset.py dataset=modelset_line
+python preprocess_dataset.py dataset=ecore_line
 ```
 
 Generate derived datasets adapted to the tasks to be evaluated:
 ```shell
-python parse_test_dataset.py --mode token-id --n 5 --parsed_test data/temp/modelset_token/test_parsed_token-id.json
-python parse_test_dataset.py --mode token --n 20 --parsed_test data/temp/modelset_token/test_parsed_token.json
+python parse_test_dataset.py dataset=modelset_line evaluation.mode=token
+python parse_test_dataset.py dataset=modelset_line evaluation.mode=token-id
+python parse_test_dataset.py dataset=modelset_line evaluation.mode=line
+python parse_test_dataset.py dataset=modelset_line evaluation.mode=block
+
+python parse_test_dataset.py dataset=ecore_line evaluation.mode=token
+python parse_test_dataset.py dataset=ecore_line evaluation.mode=token-id
+python parse_test_dataset.py dataset=ecore_line evaluation.mode=line
+python parse_test_dataset.py dataset=ecore_line evaluation.mode=block
 ```
 
 
 ## Training models
 
-### Fine-tuning existing model (best option)
+### Fine-tuning existing model
 
 Fine-tuning existing models:
 ```shell
-python train_transformer.py dataset=modelset_token model=gpt2
 python train_transformer.py dataset=modelset_line model=gpt2
+python train_transformer.py dataset=ecore_line model=gpt2
 ```
 
 ### Training tokenizer + model (not recommended)
@@ -55,12 +62,24 @@ python train_transformer.py dataset=modelset_line model=gpt2rand
 
 Token-id:
 ```shell
-python run_inference.py
-python report_results.py
+python run_inference.py dataset=ecore_line model=gpt2 evaluation.mode=token-id
+python report_results.py evaluation.mode=token-id dataset=ecore_line model=gpt2
 ```
 
 Token:
 ```shell
-python run_inference.py --mode token --n 5 --parsed_test data/temp/modelset_token/test_parsed_token.json --results data/temp/modelset_token/results_token_gpt2.csv
-python report_results.py --mode token --results data/temp/modelset_token/results_token_gpt2-medium.csv
+python run_inference.py dataset=ecore_line model=gpt2 evaluation.mode=token
+python report_results.py evaluation.mode=token dataset=ecore_line model=gpt2
+```
+
+Line:
+```shell
+python run_inference.py dataset=ecore_line model=gpt2 evaluation.mode=line
+python report_results.py evaluation.mode=line dataset=ecore_line model=gpt2
+```
+
+Block:
+```shell
+python run_inference.py dataset=ecore_line model=gpt2 evaluation.mode=block
+python report_results.py evaluation.mode=block dataset=ecore_line model=gpt2
 ```

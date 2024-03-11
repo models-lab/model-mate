@@ -1,17 +1,31 @@
-import argparse
 import os.path
 
+import evaluate
+import hydra
 import numpy as np
 import pandas as pd
-
-from parse_test_dataset import KEYWORDS
-from run_inference import SEP
 from fuzzywuzzy import fuzz
+from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+from omegaconf import DictConfig
+from tqdm import tqdm
+
+import common
+from parse_test_dataset import KEYWORDS, SPECIAL_TOKEN_IGNORE
+from run_inference import SEP
 
 
-def compute_single_result(args, result_file):
+def get_atts_block(sample):
+    tokens = sample.split(' ')
+    atts = []
+    for j, t in enumerate(tokens):
+        if t == ';':
+            atts.append(tokens[j - 1].lower())
+    return atts
+
+
+def compute_single_result(cfg, result_file):
     results = pd.read_csv(result_file)
-    if args.mode == 'token-id':
+    if cfg['evaluation']['mode'] == 'token-id':
 
         for kw in KEYWORDS:
             results_filtered = results[results["keyword"] == kw]
@@ -30,7 +44,7 @@ def compute_single_result(args, result_file):
 
             print(f'MRR for kw {kw}: {np.mean(rrs) * 100:.2f}')
 
-    elif args.mode == 'token':
+    elif cfg['evaluation']['mode'] == 'token':
         hits = 0
         for idx, row in results.iterrows():
             expected = row["expected"]
@@ -44,33 +58,46 @@ def compute_single_result(args, result_file):
         accuracy = (hits / len(results)) * 100
         print(f'Accuracy: {accuracy:.2f}')
         return {'accuracy': accuracy}
-    elif args.mode == 'line':
+    elif cfg['evaluation']['mode'] == 'line':
         hits = 0
         edit_sim = 0.0
         for _, row in results.iterrows():
             expected = row["expected"]
-            suggestion = row["suggestions"]
-            print(expected)
-            print("AA")
-            print(suggestion)
+            suggestion = row["suggestions"].split(SEP)[0]
             if expected.lower() == suggestion.lower():
                 hits += 1
             edit_sim += fuzz.ratio(suggestion.lower(), expected.lower())
         print(f'EM: {(hits / len(results)) * 100:.2f}')
-        print(f'Edit Similarity: {edit_sim / len(results) * 100:.2f}')
-    ###   # Calculate EM and edit similarity
-    ## total = len(gts)
-    #  em = 0.0
-    #   edit_sim = 0.0
-    #   for pred, gt in zip(preds, gts):
-    #       gt = json.loads(gt)["gt"]
-    #       edit_sim += fuzz.ratio(pred, gt)
-    #       if pred.split() == gt.split():
-    #           em += 1
-    #   print(self.model)
+        print(f'Edit Similarity: {edit_sim / len(results):.2f}')
+    elif cfg['evaluation']['mode'] == 'block':
+        all_bleus_k = []
+        all_bleus = []
+        recall_att_names = []
+        for _, row in tqdm(results.iterrows(), total=len(results)):
+            expected = row["expected"]
+            expected_atts = get_atts_block(expected)
+            suggestions = row["suggestions"].split(SEP)
+            pred_atts = get_atts_block(suggestions[0])
+            if len(expected_atts) != 0:
+                hits = set([att for att in expected_atts if att in pred_atts])
+                alls = set(expected_atts)
+                recall_att_names.append(len(hits) / len(alls))
 
+            expected = [s.lower() for s in expected.split() if s not in SPECIAL_TOKEN_IGNORE]
+            bleus_temp = []
+            for suggestion in suggestions:
+                suggestion = [s.lower() for s in suggestion.split() if s not in SPECIAL_TOKEN_IGNORE]
 
-#   logger.info(f"Edit sim: {round(edit_sim / total, 2)}, EM: {round(em / total * 100, 2)}\n")
+                bleus_temp.append(sentence_bleu([expected], suggestion,
+                                                smoothing_function=SmoothingFunction().method4))
+            all_bleus_k.append(max(bleus_temp))
+            all_bleus.append(sentence_bleu([expected], [s.lower() for s in suggestions[0].split()
+                                                        if s not in SPECIAL_TOKEN_IGNORE],
+                                           smoothing_function=SmoothingFunction().method4))
+
+        print(f'BLEU: {np.mean(all_bleus) * 100:.2f}')
+        print(f'BLEU best k: {np.mean(all_bleus_k) * 100:.2f}')
+        print(f'Recall attrs: {np.mean(recall_att_names) * 100:.2f}')
 
 
 def compute_several_results(args, result_folder):
@@ -95,19 +122,11 @@ def compute_several_results(args, result_folder):
     print(df)
 
 
-def main(args):
-    if os.path.isdir(args.results):
-        compute_several_results(args, args.results)
-    else:
-        compute_single_result(args, args.results)
-
-
-
+@hydra.main(version_base=None, config_path="conf", config_name="config")
+def main(cfg: DictConfig):
+    train_data_folder = common.get_train_data_folder(cfg)
+    compute_single_result(cfg, os.path.join(train_data_folder, f"results_{cfg['evaluation']['mode']}.csv"))
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Parse dataset')
-    parser.add_argument('--mode', type=str, default='token-id', choices=['token-id', 'line', 'token'])
-    parser.add_argument('--results', default='data/temp/modelset_token/results_token-id_gpt2-medium.csv')
-    args = parser.parse_args()
-    main(args)
+    main()
