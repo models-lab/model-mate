@@ -21,10 +21,10 @@ def get_atts_block(sample):
     return atts
 
 
-def compute_single_result(cfg, result_file):
+def compute_single_result(args, result_file):
     results = pd.read_csv(result_file)
-    if cfg['evaluation']['mode'] == 'token-id':
-        results = {}
+    if args.mode == 'token-id':
+        metrics = {}
         for kw in KEYWORDS:
             results_filtered = results[results["keyword"] == kw]
 
@@ -42,10 +42,10 @@ def compute_single_result(cfg, result_file):
 
             value = np.mean(rrs) * 100
             print(f'MRR for kw {kw}: {value:.2f}')
-            results[kw] = value
-        return results
+            metrics[kw] = value
+        return metrics
 
-    elif cfg['evaluation']['mode'] == 'token':
+    elif args.mode == 'token':
         hits = 0
         for idx, row in results.iterrows():
             expected = row["expected"]
@@ -59,7 +59,7 @@ def compute_single_result(cfg, result_file):
         accuracy = (hits / len(results)) * 100
         print(f'Accuracy: {accuracy:.2f}')
         return {'accuracy': accuracy}
-    elif cfg['evaluation']['mode'] == 'line':
+    elif args.mode == 'line':
         hits = 0
         edit_sim = 0.0
         for _, row in results.iterrows():
@@ -75,7 +75,7 @@ def compute_single_result(cfg, result_file):
         print(f'Edit Similarity: {es:.2f}')
         return {'EM': em, 'Edit Similarity': es}
 
-    elif cfg['evaluation']['mode'] == 'block':
+    elif args.mode == 'block':
         all_bleus_k = []
         all_bleus = []
         recall_att_names = []
