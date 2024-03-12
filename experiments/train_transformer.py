@@ -26,7 +26,8 @@ def check_tokens(tokenizer):
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
-    logger = logging.getLogger()
+    logger = logging.getLogger()    
+    logger.info(f'Training with: learning_rate = {cfg["params"]["learning_rate"]}')
 
     train_data_folder = common.get_train_data_folder(cfg)
 
@@ -98,7 +99,7 @@ def main(cfg: DictConfig):
         gradient_accumulation_steps=16,
         num_train_epochs=cfg['params']['epochs'],
         weight_decay=0.1,
-        learning_rate=1e-3,
+        learning_rate=cfg['params']['learning_rate'],
         save_strategy="epoch",
         fp16=True,
         push_to_hub=False,

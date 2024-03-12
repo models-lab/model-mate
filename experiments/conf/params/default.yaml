@@ -2,3 +2,4 @@ epochs: 10
 scheduler: linear
 context_length: 512
 batch_size: 2
+learning_rate: 1e-3
