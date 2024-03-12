@@ -119,6 +119,7 @@ def main(cfg: DictConfig):
     logging.getLogger().info(f"Running inference mode={cfg['evaluation']['mode']}")
 
     train_data_folder = common.get_train_data_folder(cfg)
+    results_folder = common.get_results_folder(cfg)
     with open(os.path.join(train_data_folder, f"parsed_test_{cfg['evaluation']['mode']}.json")) as f:
         parsed_test = json.load(f)
 
@@ -177,7 +178,8 @@ def main(cfg: DictConfig):
         raise ValueError('Not supported')
 
     pd_results = pd.DataFrame.from_dict(final_output)
-    pd_results.to_csv(os.path.join(train_data_folder, f"results_{cfg['evaluation']['mode']}.csv"))
+    os.makedirs(results_folder, exist_ok=True)
+    pd_results.to_csv(os.path.join(results_folder, f"results_{cfg['evaluation']['mode']}.csv"))
 
 
 if __name__ == '__main__':

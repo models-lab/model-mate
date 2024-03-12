@@ -14,6 +14,10 @@ def get_train_data_folder(cfg):
     return os.path.join(cfg.run.train_data_folder, cfg.dataset.name)
 
 
+def get_results_folder(cfg):
+    return os.path.join(get_train_data_folder(cfg), cfg['model']['model_name'])
+
+
 def get_test_dataset_by_token(cfg):
     train_data_folder = os.path.join(cfg.run.train_data_folder, cfg.dataset.name)
     test_tokens = os.path.join(train_data_folder, "test.txt")
