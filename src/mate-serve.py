@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from inference import TokenInference
+from inference import ModelInference
 from server.app import FlaskModelMateApp
 
 if __name__ == '__main__':
@@ -15,6 +15,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    token_inference = TokenInference(args.model, args.device)
+    token_inference = ModelInference(args.model, args.device)
     app = FlaskModelMateApp(token_inference)
     app.run()
