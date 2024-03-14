@@ -1,0 +1,5 @@
+reference: "$MODELMATE_COMPONENTS/modelmate/model.yaml"
+ml_model: "MODELMATE"
+encoding_features: "XMI"
+hyperparameters:
+  dummy: ['nothing']

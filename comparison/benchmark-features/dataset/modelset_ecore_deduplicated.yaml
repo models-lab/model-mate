@@ -1,0 +1,4 @@
+dataset_name: "modelset_ecore_deduplicated"
+model_type: ecore
+dataset_hg: "antolin/modelset"
+include_duplicates: false
