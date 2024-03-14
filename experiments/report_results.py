@@ -27,7 +27,7 @@ def compute_single_result(args, result_file):
         metrics = {}
         for kw in KEYWORDS:
             results_filtered = results[results["keyword"] == kw]
-
+            print(len(results_filtered))
             rrs = []
             for _, row in results_filtered.iterrows():
                 expected = row["expected"]

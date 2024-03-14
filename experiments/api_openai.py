@@ -35,6 +35,8 @@ def main(args):
             pt = [x for x in parsed_test[kw] if len(x[0].split()) <= 2000]
             if len(pt)>200:
                 pt = random.sample(pt, 200)
+            with open("data/temp/modelset_token/test_parsed_sampled_block.json", 'w') as file:
+                json.dump(pt, file)
             for input, expected in tqdm(pt, desc=f'KW {kw}'):
                 full_prompt = prompt + input
                 response = openai.Completion.create(
@@ -67,7 +69,8 @@ def main(args):
         pt = [x for x in parsed_test if len(encoding.encode(x[0])) <= 3500]
         if len(pt) > 1000:
             pt = random.sample(pt, 1000)
-        cnt = 0
+        #with open("data/temp/modelset_line/test_parsed_sampled_line.json", 'w') as file:
+        #    json.dump(pt, file)
         for input, expected in tqdm(pt, desc=f'Inference'):
             full_prompt = prompt + input
             response = openai.Completion.create(
@@ -96,6 +99,8 @@ def main(args):
         pt = [x for x in parsed_test if len(encoding.encode(x[0])) <= 3500]
         if len(pt) > 1000:
             pt = random.sample(pt, 1000)
+        #with open("data/temp/modelset_token/test_parsed_sampled_block.json", 'w') as file:
+        #    json.dump(pt, file)
         for input, expected in tqdm(pt, desc=f'Inference'):
             full_prompt = prompt + input
             response = openai.Completion.create(

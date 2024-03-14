@@ -4,6 +4,6 @@ train_file: train.txt
 test_file: test.txt
 val_file: dev.txt
 train_data_folder: data/temp
-models_folder: runs
+models_folder: /data/jesus/runs/trained-on-old-model
 best_model_folder: best_model
 tokenizers_folder: tokenizers

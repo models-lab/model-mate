@@ -118,10 +118,15 @@ def get_suggestions_next_block(model, tokenizer, input, cfg):
 def main(cfg: DictConfig):
     logging.getLogger().info(f"Running inference mode={cfg['evaluation']['mode']}")
 
-    train_data_folder = common.get_train_data_folder(cfg)
+    #train_data_folder = common.get_train_data_folder(cfg)
+    train_data_folder = os.path.join(cfg.run.train_data_folder, "modelset_token")
     results_folder = common.get_results_folder(cfg)
-    with open(os.path.join(train_data_folder, f"parsed_test_{cfg['evaluation']['mode']}.json")) as f:
-        parsed_test = json.load(f)
+    if cfg['evaluation']['sampled_test']:
+        with open(os.path.join(train_data_folder, f"parsed_test_sampled_{cfg['evaluation']['mode']}.json")) as f:
+            parsed_test = json.load(f)
+    else:
+        with open(os.path.join(train_data_folder, f"parsed_test_{cfg['evaluation']['mode']}.json")) as f:
+            parsed_test = json.load(f)
 
     model = AutoModelForCausalLM.from_pretrained(os.path.join(common.get_trained_model_folder(cfg),
                                                               cfg['run']['best_model_folder']),
