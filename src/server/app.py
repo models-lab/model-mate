@@ -1,18 +1,18 @@
 from flask import Flask, request, jsonify
 
-from inference import TokenInference
+from inference import ModelInference
 
 import time
 
 class FlaskModelMateApp:
-    def __init__(self, token_model: TokenInference, app: Flask = None):
+    def __init__(self, model: ModelInference, app: Flask = None):
         if app is None:
             app = Flask(__name__)
             # Load configuration from environment variables
             app.config.from_prefixed_env()
 
         self.app = app
-        self.token_model = token_model
+        self.model = model
 
         @app.post("/recommend/fragment")
         def recommend_token():
@@ -21,10 +21,13 @@ class FlaskModelMateApp:
             # type_ = data.get('type', 'token')
 
             start = time.time()
-            fragment = self.token_model.generate_fragment(text)
+            fragments = self.model.get_suggestions_next_block(text, num_beams=1)
             end = time.time()
 
             print(f"Time: {end - start}")
+
+
+            fragment = fragments[0]
             print(fragment)
 
             text = " ".join(fragment)
