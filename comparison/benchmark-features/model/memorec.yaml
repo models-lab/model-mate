@@ -1,0 +1,5 @@
+reference: "$COMPONENTS/recommendation/memorec/model.yaml"
+ml_model: "MEMOREC"
+encoding_features: "XMI"
+hyperparameters:
+  dummy: ['nothing']

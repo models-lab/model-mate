@@ -1,0 +1,7 @@
+task_name: "feature_recommendation"
+evaluation_strategy: "train_test_val"
+metric: ["mrr", "sr"]
+train_split: 0.70
+test_split: 0.15
+val_split: 0.15
+topk: 5

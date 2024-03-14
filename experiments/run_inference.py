@@ -19,7 +19,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 SEP = '<>'
 
-
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
     logging.getLogger().info(
