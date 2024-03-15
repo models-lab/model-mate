@@ -1,10 +1,12 @@
 import os.path
 import argparse
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from fuzzywuzzy import fuzz
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+from collections import defaultdict
 
 from tqdm import tqdm
 
@@ -19,7 +21,6 @@ def get_atts_block(sample):
         if t == ';':
             atts.append(tokens[j - 1].lower())
     return atts
-
 
 def compute_single_result(args, result_file):
     results = pd.read_csv(result_file)
@@ -109,6 +110,47 @@ def compute_single_result(args, result_file):
         print(f'Recall attrs: {r_att_names:.2f}')
 
         return {'BLEU': r_all_bleus, 'BLEU best k': r_all_k_bleus, 'Recall attrs': r_att_names}
+    elif args.mode == 'performance':
+        quartiles = results["predlen"].quantile([0.25, 0.5, 0.75])
+        print(quartiles)
+        print(np.mean(results["time"]))
+
+        # Create bucket intervals based on quartiles
+        bucket_intervals = [(0, quartiles[0.25]), (quartiles[0.25], quartiles[0.5]),
+                            (quartiles[0.5], quartiles[0.75]), (quartiles[0.75], results["predlen"].max())]
+
+        # Dictionary to store buckets and their respective times and counts
+        buckets = defaultdict(lambda: {"sum_time": 0, "count": 0})
+
+        # Populate buckets and calculate sum of times and counts
+        for _, row in results.iterrows():
+            len_value = row["predlen"]
+            time_value = row["time"]
+
+            # Find the appropriate bucket interval
+            for interval in bucket_intervals:
+                if interval[0] <= len_value <= interval[1]:
+                    bucket_key = interval
+                    break
+
+            buckets[bucket_key]["sum_time"] += time_value
+            buckets[bucket_key]["count"] += 1
+
+        # Calculate mean time for each bucket
+        mean_times = {interval: bucket["sum_time"] / bucket["count"] for interval, bucket in buckets.items()}
+
+        # Plot bar plots for each bucket
+        plt.figure(figsize=(10, 6))
+        for interval, mean_time in mean_times.items():
+            plt.bar(str(interval), mean_time, label=f"{interval}")
+
+        plt.xlabel("Bucket Interval")
+        plt.ylabel("Mean Time")
+        plt.title("Mean Time for Each Bucket Interval")
+        plt.legend()
+        plt.savefig("mean_time_buckets.png")
+        plt.show()
+
 
 def compute_several_results(args, result_folder):
     from os import listdir
@@ -140,7 +182,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parse dataset')
-    parser.add_argument('--mode', type=str, default='token-id', choices=['token-id', 'line', 'token', 'block'])
+    parser.add_argument('--mode', type=str, default='token-id', choices=['token-id', 'line', 'token', 'block', 'performance'])
     parser.add_argument('--results', required=True)
     args = parser.parse_args()
     main(args)

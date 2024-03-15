@@ -35,8 +35,7 @@ def main(args):
             pt = [x for x in parsed_test[kw] if len(x[0].split()) <= 2000]
             if len(pt)>200:
                 pt = random.sample(pt, 200)
-            with open("data/temp/modelset_token/test_parsed_sampled_block.json", 'w') as file:
-                json.dump(pt, file)
+
             for input, expected in tqdm(pt, desc=f'KW {kw}'):
                 full_prompt = prompt + input
                 response = openai.Completion.create(
@@ -69,8 +68,6 @@ def main(args):
         pt = [x for x in parsed_test if len(encoding.encode(x[0])) <= 3500]
         if len(pt) > 1000:
             pt = random.sample(pt, 1000)
-        #with open("data/temp/modelset_line/test_parsed_sampled_line.json", 'w') as file:
-        #    json.dump(pt, file)
         for input, expected in tqdm(pt, desc=f'Inference'):
             full_prompt = prompt + input
             response = openai.Completion.create(
@@ -99,8 +96,6 @@ def main(args):
         pt = [x for x in parsed_test if len(encoding.encode(x[0])) <= 3500]
         if len(pt) > 1000:
             pt = random.sample(pt, 1000)
-        #with open("data/temp/modelset_token/test_parsed_sampled_block.json", 'w') as file:
-        #    json.dump(pt, file)
         for input, expected in tqdm(pt, desc=f'Inference'):
             full_prompt = prompt + input
             response = openai.Completion.create(
@@ -126,7 +121,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='token-id', choices=['token-id', 'token', 'line', 'block'])
     parser.add_argument('--n', type=int, default=5)
     parser.add_argument('--seed', type=int, default=123)
-    parser.add_argument('--parsed_test', default='data/temp/modelset_token/parsed_test_block.json')
+    parser.add_argument('--parsed_test', default='data/temp/modelset_token/parsed_test_token-id.json')
     parser.add_argument('--results', default='data/temp/modelset_token/results_block_gpt3.5-instruct.csv')
     args = parser.parse_args()
     main(args)

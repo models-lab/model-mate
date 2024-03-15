@@ -61,7 +61,7 @@ def generate_samples_line(sample):
             enumerate(all_lines[1:]) if line not in SPECIAL_TOKEN_IGNORE]
 
 
-KEYWORDS = ["class", "attr", "ref", "extends", "package", "val", "]"]
+KEYWORDS = ["class", "attr", "ref", "extends", "package", "val"]
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")

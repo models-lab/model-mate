@@ -12,7 +12,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, StoppingCriteria, 
 import common
 from train_transformer import EOL_TOKEN
 from parse_test_dataset import KEYWORDS
-
+import time
 
 class CriteriaToken(StoppingCriteria):
 
@@ -119,8 +119,9 @@ def main(cfg: DictConfig):
     logging.getLogger().info(f"Running inference mode={cfg['evaluation']['mode']}")
 
     #train_data_folder = common.get_train_data_folder(cfg)
-    train_data_folder = os.path.join(cfg.run.train_data_folder, "modelset_token")
+    train_data_folder = os.path.join(cfg.run.train_data_folder, "modelset_line")
     results_folder = common.get_results_folder(cfg)
+    print(results_folder)
     if cfg['evaluation']['sampled_test']:
         with open(os.path.join(train_data_folder, f"parsed_test_sampled_{cfg['evaluation']['mode']}.json")) as f:
             parsed_test = json.load(f)
@@ -134,6 +135,10 @@ def main(cfg: DictConfig):
     tokenizer = AutoTokenizer.from_pretrained(os.path.join(common.get_trained_model_folder(cfg),
                                                            cfg['run']['best_model_folder']))
 
+    performance = {
+        "time": [],
+        "predlen": []
+    }
     if cfg['evaluation']['mode'] == 'token-id':
         final_output = {
             "input": [],
@@ -141,12 +146,14 @@ def main(cfg: DictConfig):
             "suggestions": [],
             "keyword": []
         }
+
         for kw in KEYWORDS:
             for input, expected in tqdm(parsed_test[kw], desc=f'KW {kw}'):
+                start_time = time.time()
                 suggestions = get_suggestions_next_token(model, tokenizer, input, cfg)
-                # suggestions = list(OrderedDict.fromkeys(suggestions))
-                # print(suggestions, expected)
-
+                end_time = time.time()
+                performance["time"].append(end_time-start_time)
+                performance["predlen"].append(1)
                 final_output["input"].append(input)
                 final_output["expected"].append(expected)
                 final_output["suggestions"].append(SEP.join(suggestions))
@@ -159,8 +166,11 @@ def main(cfg: DictConfig):
             "suggestions": []
         }
         for input, expected in tqdm(parsed_test, desc=f'Inference'):
+            start_time = time.time()
             suggestions = get_suggestions_next_token(model, tokenizer, input, cfg)
-            # print(suggestions, expected)
+            end_time = time.time()
+            performance["time"].append(end_time - start_time)
+            performance["predlen"].append(1)
             final_output["input"].append(input)
             final_output["expected"].append(expected)
             final_output["suggestions"].append(SEP.join(suggestions))
@@ -174,7 +184,14 @@ def main(cfg: DictConfig):
             if cfg['evaluation']['mode'] == 'line' else get_suggestions_next_block
 
         for input, expected in tqdm(parsed_test, desc=f'Inference'):
+            start_time = time.time()
             suggestions = get_suggestions(model, tokenizer, input, cfg)
+            end_time = time.time()
+            performance["time"].append(end_time - start_time)
+            predlen = 0
+            for x in suggestions:
+                predlen += len(tokenizer([x], return_tensors="pt")["input_ids"])
+            performance["predlen"].append(predlen)
             final_output["input"].append(input)
             final_output["expected"].append(expected)
             final_output["suggestions"].append(SEP.join(suggestions))
@@ -183,8 +200,17 @@ def main(cfg: DictConfig):
         raise ValueError('Not supported')
 
     pd_results = pd.DataFrame.from_dict(final_output)
-    os.makedirs(results_folder, exist_ok=True)
-    pd_results.to_csv(os.path.join(results_folder, f"results_{cfg['evaluation']['mode']}.csv"))
+    #os.makedirs(results_folder, exist_ok=True)
+    #if cfg['evaluation']['sampled_test']:
+        #pd_results.to_csv(os.path.join(results_folder, f"results_sampled_{cfg['evaluation']['mode']}.csv"))
+    #else:
+        #pd_results.to_csv(os.path.join(results_folder, f"results_{cfg['evaluation']['mode']}.csv"))
+
+    pd_results2 = pd.DataFrame.from_dict(performance)
+    if cfg['evaluation']['sampled_test']:
+        pd_results2.to_csv(os.path.join(results_folder, f"performance_sampled_{cfg['evaluation']['mode']}.csv"))
+    else:
+        pd_results2.to_csv(os.path.join(results_folder, f"performance_{cfg['evaluation']['mode']}.csv"))
 
 
 if __name__ == '__main__':

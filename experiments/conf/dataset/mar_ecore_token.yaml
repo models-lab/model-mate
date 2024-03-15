@@ -1,0 +1,5 @@
+level: token
+path: data/dataset/
+full_dataset: ecore-mar-lines-dedup.txt
+name: mar_ecore_token
+

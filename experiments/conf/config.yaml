@@ -1,6 +1,6 @@
 defaults:
-  - dataset: xtext_mar_token
+  - dataset: ecore_line
   - run: default
-  - model: gpt2
+  - model: codeparrot_multi
   - params: default
   - evaluation: default
