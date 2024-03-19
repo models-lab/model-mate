@@ -22,9 +22,24 @@ def get_atts_block(sample):
             atts.append(tokens[j - 1].lower())
     return atts
 
-def compute_single_result(args, result_file):
-    results = pd.read_csv(result_file)
-    if args.mode == 'token-id':
+
+def compute_single_result(args, mode, result_file):
+    try:
+        results = pd.read_csv(result_file)
+    except:
+        print("Can't load ", result_file)
+        if mode == 'token-id':
+            return {kw: 0 for kw in KEYWORDS}
+        elif mode == 'token':
+            return {'accuracy': 0}
+        elif mode == 'line':
+            return {'EM': 0, 'Edit Similarity': 0}
+        elif mode == 'block':
+            return {'BLEU': 0, 'BLEU best k': 0, 'Recall attrs': 0}
+        else:
+            raise ValueError("Invalid mode")
+
+    if mode == 'token-id':
         metrics = {}
         for kw in KEYWORDS:
             results_filtered = results[results["keyword"] == kw]
@@ -46,7 +61,7 @@ def compute_single_result(args, result_file):
             metrics[kw] = round(value, 2)
         return metrics
 
-    elif args.mode == 'token':
+    elif mode == 'token':
         hits = 0
         for idx, row in results.iterrows():
             expected = row["expected"]
@@ -60,7 +75,7 @@ def compute_single_result(args, result_file):
         accuracy = (hits / len(results)) * 100
         print(f'Accuracy: {accuracy:.2f}')
         return {'accuracy': accuracy}
-    elif args.mode == 'line':
+    elif mode == 'line':
         hits = 0
         edit_sim = 0.0
         for _, row in results.iterrows():
@@ -75,8 +90,8 @@ def compute_single_result(args, result_file):
         print(f'EM: {em:.2f}')
         print(f'Edit Similarity: {es:.2f}')
         return {'EM': round(em, 2), 'Edit Similarity': round(es, 2)}
-    
-    elif args.mode == 'block':
+
+    elif mode == 'block':
         all_bleus_k = []
         all_bleus = []
         recall_att_names = []
@@ -109,7 +124,9 @@ def compute_single_result(args, result_file):
         print(f'BLEU best k: {r_all_k_bleus:.2f}')
         print(f'Recall attrs: {r_att_names:.2f}')
 
-        return {'BLEU': round(r_all_bleus, 2), 'BLEU best k': round(r_all_k_bleus, 2), 'Recall attrs': round(r_att_names, 2)}
+        return {'BLEU': round(r_all_bleus, 2), 'BLEU best k': round(r_all_k_bleus, 2),
+                'Recall attrs': round(r_att_names, 2)}
+
     elif args.mode == 'performance':
         quartiles = results["predlen"].quantile([0.25, 0.5, 0.75])
         print(quartiles)
@@ -149,59 +166,99 @@ def compute_single_result(args, result_file):
         plt.title("Mean Time for Each Bucket Interval")
         plt.legend()
         plt.savefig("mean_time_buckets.png")
-        plt.show()
+        # plt.show()
 
-def compute_several_results(args, result_folder):
-    from os import listdir
-    from os.path import isfile, join
+        return mean_times
+        
+    raise ValueError("Invalid mode: " + mode)
 
+
+def compute_results_by_mode(result_folder, mode):
     folders = result_folder.split(',')
-    files = [(os.path.basename(f), os.path.join(f, 'results_' + args.mode + '.csv')) for f in folders]
-    #files = [join(result_folder, f) for f in listdir(result_folder) if isfile(join(result_folder, f))]
+    files = [(os.path.basename(f), os.path.join(f, 'results_' + mode + '.csv')) for f in folders]
 
     rows = []
     for name, f in files:
         print("Processing ", f)
         result = {'Model': name}
-        result.update(compute_single_result(args, f))
+        result.update(compute_single_result(args, mode, f))
         rows.append(result)
 
     import pandas as pd
     df = pd.DataFrame(rows)
+    return df
+
+
+def compute_all_results(args, result_folder):
+    modes = ['token-id', 'line', 'token', 'block']
+    df = compute_results_by_mode(result_folder, modes[0])
+    for mode in modes[1:]:
+        df2 = compute_results_by_mode(result_folder, mode)
+        df = pd.merge(df, df2, on='Model', how='outer')
+
+    df = format_dataframe(args, df)
+
+    ltx = df.to_latex(index=False)
+    print(ltx)
+
+def compute_several_results(args, result_folder):
+    folders = result_folder.split(',')
+    files = [(os.path.basename(f), os.path.join(f, 'results_' + args.mode + '.csv')) for f in folders]
+    # files = [join(result_folder, f) for f in listdir(result_folder) if isfile(join(result_folder, f))]
+
+    rows = []
+    for name, f in files:
+        print("Processing ", f)
+        result = {'Model': name}
+        result.update(compute_single_result(args, args.mode, f))
+        rows.append(result)
+
+    import pandas as pd
+    df = pd.DataFrame(rows)
+    df = format_dataframe(args, df)
+
+    ltx = df.to_latex(index=False)
+    # ltx = df.to_latex(columns=['name', 'accuracy'])
+    # ltx = stl.to_latex()
+    print(ltx)
+
+
+def format_dataframe(args, df):
     if args.sort is not None:
         df = df.sort_values(by=[args.sort], ascending=False)
-        
     import yaml
     with open(args.mapping, 'r') as file:
         mapping = yaml.safe_load(file)
-
     df['Model'].replace(mapping['models'], inplace=True)
-    #print(mapping['models'])
-    #for key, value in mapping['models'].items():
+    # print(mapping['models'])
+    # for key, value in mapping['models'].items():
     #    if key in df:
     #        df = df.rename(columns={key: value})
-
     for key, value in mapping['metrics'].items():
         if key in df:
             df[key] = df[key].map(lambda x: round(x, 2))
             df = df.rename(columns={key: value})
-            
-    ltx = df.to_latex(index=False)
-    #ltx = df.to_latex(columns=['name', 'accuracy'])
-    #ltx = stl.to_latex()
-    print(ltx)
+    return df
+
 
 def main(args):
     # if os.path.isdir(args.results):
     if "," in args.results:
-        compute_several_results(args, args.results)
+        if args.mode == 'all':
+            compute_all_results(args, args.results)
+        else:
+            compute_several_results(args, args.results)
     else:
-        compute_single_result(args, args.results)
+        compute_single_result(args, args.mode, args.results)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parse dataset')
+<<<<<<< HEAD
     parser.add_argument('--mode', type=str, default='token-id', choices=['token-id', 'line', 'token', 'block', 'performance'])
+=======
+    parser.add_argument('--mode', type=str, default='token-id', choices=['all', 'token-id', 'line', 'token', 'block'])
+>>>>>>> 3261a2e (Report results able to aggregate everything in a single table)
     parser.add_argument('--results', required=True)
     parser.add_argument('--sort', required=False)
     parser.add_argument('--mapping', required=True, default='mapping.yaml')
