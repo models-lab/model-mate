@@ -1,0 +1,4 @@
+is_pretrained: True
+hugging_face_model: distilbert/distilgpt2
+model_name: distilgpt2
+local_tokenizer: False

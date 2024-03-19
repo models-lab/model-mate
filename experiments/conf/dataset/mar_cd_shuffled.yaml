@@ -1,0 +1,5 @@
+level: line
+path: data/dataset/
+full_dataset: mar-ecore-cd-shuffled-dedup.txt
+name: mar_cd_shuffled
+
