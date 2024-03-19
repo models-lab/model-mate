@@ -43,7 +43,7 @@ def compute_single_result(args, result_file):
 
             value = np.mean(rrs) * 100
             print(f'MRR for kw {kw}: {value:.2f}')
-            metrics[kw] = value
+            metrics[kw] = round(value, 2)
         return metrics
 
     elif args.mode == 'token':
@@ -74,8 +74,8 @@ def compute_single_result(args, result_file):
         es = edit_sim / len(results)
         print(f'EM: {em:.2f}')
         print(f'Edit Similarity: {es:.2f}')
-        return {'EM': em, 'Edit Similarity': es}
-
+        return {'EM': round(em, 2), 'Edit Similarity': round(es, 2)}
+    
     elif args.mode == 'block':
         all_bleus_k = []
         all_bleus = []
@@ -109,7 +109,7 @@ def compute_single_result(args, result_file):
         print(f'BLEU best k: {r_all_k_bleus:.2f}')
         print(f'Recall attrs: {r_att_names:.2f}')
 
-        return {'BLEU': r_all_bleus, 'BLEU best k': r_all_k_bleus, 'Recall attrs': r_att_names}
+        return {'BLEU': round(r_all_bleus, 2), 'BLEU best k': round(r_all_k_bleus, 2), 'Recall attrs': round(r_att_names, 2)}
     elif args.mode == 'performance':
         quartiles = results["predlen"].quantile([0.25, 0.5, 0.75])
         print(quartiles)
@@ -151,30 +151,49 @@ def compute_single_result(args, result_file):
         plt.savefig("mean_time_buckets.png")
         plt.show()
 
-
 def compute_several_results(args, result_folder):
     from os import listdir
     from os.path import isfile, join
 
-    files = [join(result_folder, f) for f in listdir(result_folder) if isfile(join(result_folder, f))]
+    folders = result_folder.split(',')
+    files = [(os.path.basename(f), os.path.join(f, 'results_' + args.mode + '.csv')) for f in folders]
+    #files = [join(result_folder, f) for f in listdir(result_folder) if isfile(join(result_folder, f))]
 
     rows = []
-    for f in files:
-        print(f)
-        if not f.endswith('csv'):
-            continue
-
+    for name, f in files:
         print("Processing ", f)
-        result = compute_single_result(args, f)
-        result['name'] = os.path.basename(f)
+        result = {'Model': name}
+        result.update(compute_single_result(args, f))
         rows.append(result)
 
     import pandas as pd
     df = pd.DataFrame(rows)
-    print(df)
+    if args.sort is not None:
+        df = df.sort_values(by=[args.sort], ascending=False)
+        
+    import yaml
+    with open(args.mapping, 'r') as file:
+        mapping = yaml.safe_load(file)
+
+    df['Model'].replace(mapping['models'], inplace=True)
+    #print(mapping['models'])
+    #for key, value in mapping['models'].items():
+    #    if key in df:
+    #        df = df.rename(columns={key: value})
+
+    for key, value in mapping['metrics'].items():
+        if key in df:
+            df[key] = df[key].map(lambda x: round(x, 2))
+            df = df.rename(columns={key: value})
+            
+    ltx = df.to_latex(index=False)
+    #ltx = df.to_latex(columns=['name', 'accuracy'])
+    #ltx = stl.to_latex()
+    print(ltx)
 
 def main(args):
-    if os.path.isdir(args.results):
+    # if os.path.isdir(args.results):
+    if "," in args.results:
         compute_several_results(args, args.results)
     else:
         compute_single_result(args, args.results)
@@ -184,5 +203,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parse dataset')
     parser.add_argument('--mode', type=str, default='token-id', choices=['token-id', 'line', 'token', 'block', 'performance'])
     parser.add_argument('--results', required=True)
+    parser.add_argument('--sort', required=False)
+    parser.add_argument('--mapping', required=True, default='mapping.yaml')
     args = parser.parse_args()
     main(args)

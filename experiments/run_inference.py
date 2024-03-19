@@ -116,7 +116,7 @@ def get_suggestions_next_block(model, tokenizer, input, cfg):
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
-    logging.getLogger().info(f"Running inference mode={cfg['evaluation']['mode']}")
+    logging.getLogger().info(f"Running inference mode={cfg['evaluation']['mode']}, max_new_tokens={cfg['evaluation']['max_new_tokens']}")
 
     #train_data_folder = common.get_train_data_folder(cfg)
     train_data_folder = os.path.join(cfg.run.train_data_folder, "modelset_line")

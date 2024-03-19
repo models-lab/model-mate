@@ -1,5 +1,6 @@
 epochs: 10
 scheduler: linear
-context_length: 512
+context_length: 1024
 batch_size: 2
-learning_rate: 1e-3
+gradient_accumulation_steps: 16
+learning_rate: 5e-5

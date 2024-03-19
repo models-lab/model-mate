@@ -1,0 +1,12 @@
+metrics:
+ accuracy: Accuracy
+
+models:
+ codegen-350M-mono: codegen-mono
+ codegen-350M-multi: codegen-multi
+ codeparrot-small-multi: codeparrot
+ gpt2-large: gpt2-large
+ codegen-350M-nl: codegen-nl
+ gpt2-medium: gpt2-medium
+ gpt2: gpt2
+ distilgpt2: distil-gpt2
