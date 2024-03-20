@@ -145,7 +145,7 @@ def compute_results_by_mode(result_folder, mode):
 
 
 def compute_all_results(args, result_folder):
-    modes = ['token-id', 'line', 'token', 'block']
+    modes = ['token', 'token-id', 'line', 'block']
     df = compute_results_by_mode(result_folder, modes[0])
     for mode in modes[1:]:
         df2 = compute_results_by_mode(result_folder, mode)
@@ -179,6 +179,9 @@ def compute_several_results(args, result_folder):
 
 
 def format_dataframe(args, df):
+    if args.mapping is None:
+        return df
+    
     if args.sort is not None:
         df = df.sort_values(by=[args.sort], ascending=False)
     import yaml
@@ -212,6 +215,6 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='token-id', choices=['all', 'token-id', 'line', 'token', 'block'])
     parser.add_argument('--results', required=True)
     parser.add_argument('--sort', required=False)
-    parser.add_argument('--mapping', required=True, default='mapping.yaml')
+    parser.add_argument('--mapping', required=False, default='mapping.yaml')
     args = parser.parse_args()
     main(args)
