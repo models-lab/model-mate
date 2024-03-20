@@ -1,5 +1,5 @@
 # evaluation
-mode: token-id
+mode: line
 samples_token_id: 5
 samples_line: 5
 samples_token: 5
@@ -7,6 +7,6 @@ samples_block: 5
 
 num_beams: 5
 
-max_new_tokens: 256
+max_new_tokens: 20
 
-sampled_test: yes
+sampled_test: no
