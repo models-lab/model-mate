@@ -63,6 +63,10 @@ def compute_single_result(args, mode, result_file):
         hits = 0
         for idx, row in results.iterrows():
             expected = row["expected"]
+            if isinstance(expected, float):
+                print("Non-string type in ", row)
+                expected = str(expected)
+
             if type(row["suggestions"]) is not str:
                 print(idx, row["suggestions"])
                 continue
