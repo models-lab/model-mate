@@ -9,4 +9,4 @@ num_beams: 5
 
 max_new_tokens: 20
 
-sampled_test: no
+sampled_test: false

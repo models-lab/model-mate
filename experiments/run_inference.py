@@ -118,12 +118,14 @@ def get_suggestions_next_block(model, tokenizer, input, cfg):
 def main(cfg: DictConfig):
     logging.getLogger().info(f"Running inference mode={cfg['evaluation']['mode']}, max_new_tokens={cfg['evaluation']['max_new_tokens']}")
 
-    #train_data_folder = common.get_train_data_folder(cfg)
-    train_data_folder = os.path.join(cfg.run.train_data_folder, "modelset_line")
+    train_data_folder = common.get_train_data_folder(cfg)
+    #train_data_folder = os.path.join(cfg.run.train_data_folder, "modelset_line")
     results_folder = common.get_results_folder(cfg)
     print(results_folder)
     if cfg['evaluation']['sampled_test']:
-        with open(os.path.join(train_data_folder, f"parsed_test_sampled_{cfg['evaluation']['mode']}.json")) as f:
+        print("Using a specific test file:", cfg.evaluation.sampled_test)
+        with open(cfg.evaluation.sampled_test) as f:
+        # with open(os.path.join(train_data_folder, f"parsed_test_sampled_{cfg['evaluation']['mode']}.json")) as f:
             parsed_test = json.load(f)
     else:
         with open(os.path.join(train_data_folder, f"parsed_test_{cfg['evaluation']['mode']}.json")) as f:
@@ -200,11 +202,14 @@ def main(cfg: DictConfig):
         raise ValueError('Not supported')
 
     pd_results = pd.DataFrame.from_dict(final_output)
-    #os.makedirs(results_folder, exist_ok=True)
-    #if cfg['evaluation']['sampled_test']:
-        #pd_results.to_csv(os.path.join(results_folder, f"results_sampled_{cfg['evaluation']['mode']}.csv"))
-    #else:
-        #pd_results.to_csv(os.path.join(results_folder, f"results_{cfg['evaluation']['mode']}.csv"))
+    os.makedirs(results_folder, exist_ok=True)
+    if cfg['evaluation']['sampled_test']:
+        evaluation_result_file = os.path.join(results_folder, f"results_sampled_{cfg['evaluation']['mode']}.csv")
+    else:
+        evaluation_result_file = e = os.path.join(results_folder, f"results_{cfg['evaluation']['mode']}.csv")
+    
+    print("Writing results to: ", evaluation_result_file)
+    pd_results.to_csv(evaluation_result_file)
 
     pd_results2 = pd.DataFrame.from_dict(performance)
     if cfg['evaluation']['sampled_test']:

@@ -83,3 +83,13 @@ Block:
 python run_inference.py dataset=ecore_line model=gpt2 evaluation.mode=block
 python report_results.py evaluation.mode=block dataset=ecore_line model=gpt2
 ```
+
+## Generating sampled datasets
+
+```
+python sample_test_set.py --mode line --parsed_test data/temp/ecore_line/parsed_test_line.json --output data/temp/ecore_line/parsed_test_line-sample-1000.json
+
+python sample_test_set.py --mode line --parsed_test data/temp/ecore_line/parsed_test_token-id.json --output data/temp/ecore_line/parsed_test_token-id-sample-200.json --num_samples 200
+
+python sample_test_set.py --mode block --parsed_test data/temp/ecore_line/parsed_test_line.json --output data/temp/ecore_line/parsed_test_block-sample-1000.json
+```	    
