@@ -4,3 +4,4 @@ defaults:
   - model: gpt2
   - params: default
   - evaluation: default
+  - language: emfatic
