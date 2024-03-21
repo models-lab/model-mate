@@ -1,0 +1,4 @@
+level: line
+path: data/dataset/
+full_dataset: xtext-mar-line-dedup.txt
+name: xtext_mar-line-dedup

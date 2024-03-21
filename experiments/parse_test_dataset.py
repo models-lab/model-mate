@@ -13,6 +13,19 @@ import common
 from preprocess_dataset import SPECIAL_TOKEN
 from train_transformer import EOL_TOKEN, BOS_TOKEN, EOS_TOKEN, UNK_TOKEN
 
+class TokenMatcher:
+    def __init__(self, cfg):
+        self.regex = cfg.regex
+        self.result =
+
+class Language:
+    """A simple specification of a language"""
+
+    def __init__(self, cfg):
+        self.keywords = cfg.keywords if 'keywords' in cfg.keywords else []
+        self.matchers = [TokenMatcher(m) for m in cfg.matches]
+        for t in cfg.tests:
+            
 
 def generate_samples_kw(sample, keyword="class"):
     positions = []
@@ -73,6 +86,8 @@ def main(cfg: DictConfig):
                            data_files={"test": os.path.join(train_data_folder, cfg['run']['test_file'])})["test"]
 
     logging.getLogger().info(f"Generate parsed test dataset mode={cfg['evaluation']['mode']}")
+
+    language = to_language(cfg.language)
 
     if cfg['evaluation']['mode'] == 'token-id':
         # token id

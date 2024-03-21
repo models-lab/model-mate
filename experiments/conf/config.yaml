@@ -4,3 +4,4 @@ defaults:
   - model: codeparrot_multi
   - params: default
   - evaluation: default
+  - language: emfatic

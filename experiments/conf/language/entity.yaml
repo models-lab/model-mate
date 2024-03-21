@@ -1,0 +1,15 @@
+name: entity
+keywords: ['package', 'class']
+matches:
+  'attr_name':
+    regex: ['[a-zA-Z0-9_]+', ':', '*']
+    result: 0
+    tests:
+      - value: 'name: String'
+      - expected: 'name'
+  'attr_type':
+    regex: [ '*', ':', '[a-zA-Z0-9_]+' ]
+    result: 2
+    tests:
+      - value: 'name: String'
+      - expected: 'String'
