@@ -1,15 +1,15 @@
 name: entity
-keywords: ['package', 'class']
+keywords: ['package', 'entity']
 matches:
   'attr_name':
-    regex: ['[a-zA-Z0-9_]+', ':', '*']
+    regex: ['[a-zA-Z0-9_]+', ':', '[a-zA-Z0-9_]+']
     result: 0
     tests:
-      - value: 'name: String'
-      - expected: 'name'
+      - value: 'name : String'
+        expected: 'name'
   'attr_type':
-    regex: [ '*', ':', '[a-zA-Z0-9_]+' ]
-    result: 2
+    regex: [ ':', '[a-zA-Z0-9_]+', '<EOL>' ]
+    result: 1
     tests:
-      - value: 'name: String'
-      - expected: 'String'
+      - value: ': String <EOL>'
+        expected: 'String'

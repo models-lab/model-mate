@@ -10,8 +10,8 @@ from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForCausalLM, StoppingCriteria, StoppingCriteriaList
 
 import common
+from parse_test_dataset import Language
 from train_transformer import EOL_TOKEN
-from parse_test_dataset import KEYWORDS
 import time
 
 class CriteriaToken(StoppingCriteria):
@@ -119,7 +119,6 @@ def main(cfg: DictConfig):
     logging.getLogger().info(f"Running inference mode={cfg['evaluation']['mode']}, max_new_tokens={cfg['evaluation']['max_new_tokens']}")
 
     train_data_folder = common.get_train_data_folder(cfg)
-    #train_data_folder = os.path.join(cfg.run.train_data_folder, "modelset_line")
     results_folder = common.get_results_folder(cfg)
     print(results_folder)
     if cfg['evaluation']['sampled_test']:
@@ -149,7 +148,10 @@ def main(cfg: DictConfig):
             "keyword": []
         }
 
-        for kw in KEYWORDS:
+        language = Language(cfg.language)
+
+        for kw in language.token_type_names:
+            print("Processing for ", kw)
             for input, expected in tqdm(parsed_test[kw], desc=f'KW {kw}'):
                 start_time = time.time()
                 suggestions = get_suggestions_next_token(model, tokenizer, input, cfg)

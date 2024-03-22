@@ -84,12 +84,40 @@ python run_inference.py dataset=ecore_line model=gpt2 evaluation.mode=block
 python report_results.py evaluation.mode=block dataset=ecore_line model=gpt2
 ```
 
-## Generating sampled datasets
 
-```
+## Comparison against GPT 3.5
+
+To avoid the bias that GPT 3.5. has been tested only on a sample of the original dataset, the same sampled datasets are used to re-evaluate the models.
+
+### Generating sampled datasets
+
+```bash
 python sample_test_set.py --mode line --parsed_test data/temp/ecore_line/parsed_test_line.json --output data/temp/ecore_line/parsed_test_line-sample-1000.json
 
-python sample_test_set.py --mode line --parsed_test data/temp/ecore_line/parsed_test_token-id.json --output data/temp/ecore_line/parsed_test_token-id-sample-200.json --num_samples 200
+python sample_test_set.py --mode token-id --parsed_test data/temp/ecore_line/parsed_test_token-id.json --output data/temp/ecore_line/parsed_test_token-id-sample-200.json --num_samples 200
 
-python sample_test_set.py --mode block --parsed_test data/temp/ecore_line/parsed_test_line.json --output data/temp/ecore_line/parsed_test_block-sample-1000.json
-```	    
+python sample_test_set.py --mode block --parsed_test data/temp/ecore_line/parsed_test_block.json --output data/temp/ecore_line/parsed_test_block-sample-1000.json
+```
+
+### Evaluation
+
+```
+# Token-id
+python run_inference.py --multirun dataset=ecore_line model=codegen_multi,codeparrot_multi,gpt2-large evaluation.mode=token-id evaluation.max_new_tokens=8 params.context_length=512 evaluation.sampled_test=data/temp/ecore_line/parsed_test_token-id-sample-200.json language=emfatic
+
+# Line
+python run_inference.py --multirun dataset=ecore_line model=codegen_multi,codeparrot_multi,gpt2-large evaluation.mode=line evaluation.max_new_tokens=32 params.context_length=512 evaluation.sampled_test=data/temp/ecore_line/parsed_test_line-sample-1000.json language=emfatic
+```
+
+### Reporting results
+
+```bash
+# Token-id
+
+python report_results.py --mode token-id --results data/temp/ecore_line/codeparrot/codeparrot-small-multi/results_sampled_token-id.csv,data/temp/ecore_line/Salesforce/codegen-350M-multi/results_sampled_token-id.csv,data/temp/ecore_line/gpt2-large/results_sampled_token-id.csv  --language=conf/language/emfatic.yaml
+
+```
+
+# Line
+
+python report_results.py --mode line --results data/temp/ecore_line/codeparrot/codeparrot-small-multi/results_sampled_line.csv,data/temp/ecore_line/Salesforce/codegen-350M-multi/results_sampled_line.csv,data/temp/ecore_line/gpt2-large/results_sampled_line.csv  --language=conf/language/emfatic.yaml

@@ -4,7 +4,7 @@ import tiktoken
 
 def main(args):
     random.seed(args.seed)
-    KEYWORDS = ["class", "attr", "ref", "extends", "package", "val", "["]
+    KEYWORDS = ["class", "attr", "ref", "extends", "package", "val", "]"]
     with open(args.parsed_test) as f:
         parsed_test = json.load(f)
 

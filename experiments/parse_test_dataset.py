@@ -12,20 +12,62 @@ from tqdm import tqdm
 import common
 from preprocess_dataset import SPECIAL_TOKEN
 from train_transformer import EOL_TOKEN, BOS_TOKEN, EOS_TOKEN, UNK_TOKEN
+import re
+
 
 class TokenMatcher:
-    def __init__(self, cfg):
-        self.regex = cfg.regex
-        self.result =
+    def __init__(self, name, cfg):
+        self.name = name
+        self.regexes = [re.compile(r) for r in cfg.regex]
+        self.result = cfg.result
+        self.tests = cfg.tests
+
+    def do_self_test(self):
+        for t in self.tests:
+            match = self.match(t.value.split(' '), 0)
+            print("Checking ", t.value, " with ", [str(r) for r in self.regexes])
+            print("Result: ", match)
+
+            assert t.expected == match
+
+    def match(self, token_sequence, idx):
+        current_idx = idx
+        matches = []
+        for regex in self.regexes:
+            if current_idx == len(token_sequence):
+                return None
+
+            token = token_sequence[current_idx]
+            m = regex.match(token)
+            if m is None:
+                return None
+
+            matches.append(m)
+            current_idx = current_idx + 1
+
+        return matches[self.result].group(0)
+
 
 class Language:
     """A simple specification of a language"""
 
     def __init__(self, cfg):
-        self.keywords = cfg.keywords if 'keywords' in cfg.keywords else []
-        self.matchers = [TokenMatcher(m) for m in cfg.matches]
-        for t in cfg.tests:
-            
+        self.keywords = cfg.keywords if 'keywords' in cfg else []
+        self.matchers = [TokenMatcher(name, m) for name, m in cfg.matches.items()] if 'matches' in cfg else []
+        for m in self.matchers:
+            m.do_self_test()
+
+    @property
+    def token_type_names(self):
+        return self.keywords + [m.name for m in self.matchers]
+
+    def match(self, token_sequence, idx):
+        for m in self.matchers:
+            matched_string = m.match(token_sequence, idx)
+            if matched_string is not None:
+                return matched_string, m
+        return None, None
+
 
 def generate_samples_kw(sample, keyword="class"):
     positions = []
@@ -43,6 +85,28 @@ def generate_samples_kw(sample, keyword="class"):
         output_token = sample[p + 1:].split(' ')[0]
         pairs.append((input_seq, output_token))
     return pairs
+
+
+def generate_samples_regex(sample, language):
+    output = defaultdict(list)
+
+    tokens = sample.split(' ')
+    position = 0
+    for idx, token in enumerate(tokens):
+        expected_token, match = language.match(tokens, idx)
+        offset = 0
+
+        if expected_token is not None:
+            offset = match.result * 2
+            # This is the position of the matched token (e.g., : Type <EOL>) => result = 1
+            # Multiply by 2 to account for the spaces
+
+            input_seq = sample[:(position + offset - 1)]
+            output[match.name].append((input_seq, expected_token))
+
+        position = position + len(token) + 1
+
+    return output
 
 
 def generate_samples_block(sample):
@@ -74,8 +138,6 @@ def generate_samples_line(sample):
             enumerate(all_lines[1:]) if line not in SPECIAL_TOKEN_IGNORE]
 
 
-KEYWORDS = ["class", "attr", "ref", "extends", "package", "val"]
-
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
@@ -87,17 +149,26 @@ def main(cfg: DictConfig):
 
     logging.getLogger().info(f"Generate parsed test dataset mode={cfg['evaluation']['mode']}")
 
-    language = to_language(cfg.language)
+    language = Language(cfg.language)
 
     if cfg['evaluation']['mode'] == 'token-id':
+        samples_per_token_id = cfg['evaluation']['samples_token_id']
+
         # token id
         output = defaultdict(list)
         for sample in tqdm(dataset["text"], desc='Parsing'):
-            for kw in KEYWORDS:
+            for kw in language.keywords:
                 pairs_temp = generate_samples_kw(sample, kw)
-                if len(pairs_temp) > cfg['evaluation']['samples_token_id']:
-                    pairs_temp = random.sample(pairs_temp, cfg['evaluation']['samples_token_id'])
+                if len(pairs_temp) > samples_per_token_id:
+                    pairs_temp = random.sample(pairs_temp, samples_per_token_id)
                 output[kw] += pairs_temp
+
+            pairs_by_match = generate_samples_regex(sample, language)
+            for key, pairs_temp in pairs_by_match.items():
+                if len(pairs_temp) > samples_per_token_id:
+                    pairs_temp = random.sample(pairs_temp, samples_per_token_id)
+                output[key] += pairs_temp
+
     elif cfg['evaluation']['mode'] == 'token':
         # random token
         output = []
@@ -124,8 +195,11 @@ def main(cfg: DictConfig):
     else:
         raise ValueError('Mode not supported')
 
-    with open(os.path.join(train_data_folder, f"parsed_test_{cfg['evaluation']['mode']}.json"), 'w') as f:
+    filename = os.path.join(train_data_folder, f"parsed_test_{cfg['evaluation']['mode']}.json")
+    with open(filename, 'w') as f:
         json.dump(output, f)
+
+    print("Test file written in ", filename)
 
 
 if __name__ == '__main__':

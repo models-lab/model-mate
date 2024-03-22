@@ -10,7 +10,7 @@ from collections import defaultdict
 
 from tqdm import tqdm
 
-from parse_test_dataset import KEYWORDS, SPECIAL_TOKEN_IGNORE
+from parse_test_dataset import SPECIAL_TOKEN_IGNORE, Language
 from run_inference import SEP
 
 
@@ -22,14 +22,21 @@ def get_atts_block(sample):
             atts.append(tokens[j - 1].lower())
     return atts
 
+def load_language(language_path: str):
+    from omegaconf import OmegaConf
+    with open(language_path) as f:
+        loaded_lang = OmegaConf.load(f)
+        return Language(loaded_lang)
+
 
 def compute_single_result(args, mode, result_file):
+    language = load_language(args.language)
     try:
         results = pd.read_csv(result_file)
     except:
         print("Can't load ", result_file)
         if mode == 'token-id':
-            return {kw: 0 for kw in KEYWORDS}
+            return {kw: 0 for kw in language.token_type_names}
         elif mode == 'token':
             return {'accuracy': 0}
         elif mode == 'line':
@@ -41,9 +48,9 @@ def compute_single_result(args, mode, result_file):
 
     if mode == 'token-id':
         metrics = {}
-        for kw in KEYWORDS:
+        for kw in language.token_type_names:
             results_filtered = results[results["keyword"] == kw]
-            print(len(results_filtered))
+            #print(len(results_filtered))
             rrs = []
             for _, row in results_filtered.iterrows():
                 expected = row["expected"]
@@ -179,7 +186,8 @@ def compute_single_result(args, mode, result_file):
 
 def compute_results_by_mode(result_folder, mode):
     folders = result_folder.split(',')
-    files = [(os.path.basename(f), os.path.join(f, 'results_' + mode + '.csv')) for f in folders]
+    files = [(os.path.basename(f), os.path.join(f, 'results_' + mode + '.csv')) for f in folders if not f.endswith('.csv')]
+    files += [(os.path.basename(os.path.dirname(f)), f) for f in folders if f.endswith('.csv')]
 
     rows = []
     for name, f in files:
@@ -207,8 +215,10 @@ def compute_all_results(args, result_folder):
 
 def compute_several_results(args, result_folder):
     folders = result_folder.split(',')
-    files = [(os.path.basename(f), os.path.join(f, 'results_' + args.mode + '.csv')) for f in folders]
-    # files = [join(result_folder, f) for f in listdir(result_folder) if isfile(join(result_folder, f))]
+    # files = [(os.path.basename(f), os.path.join(f, 'results_' + args.mode + '.csv')) for f in folders]
+    files = [(os.path.basename(f), os.path.join(f, 'results_' + mode + '.csv')) for f in folders if not f.endswith('.csv')]
+    files += [(os.path.basename(os.path.dirname(f)), f) for f in folders if f.endswith('.csv')]
+
 
     rows = []
     for name, f in files:
@@ -261,13 +271,15 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parse dataset')
-<<<<<<< HEAD
-    parser.add_argument('--mode', type=str, default='token-id', choices=['token-id', 'line', 'token', 'block', 'performance'])
-=======
     parser.add_argument('--mode', type=str, default='token-id', choices=['all', 'token-id', 'line', 'token', 'block'])
->>>>>>> 3261a2e (Report results able to aggregate everything in a single table)
     parser.add_argument('--results', required=True)
     parser.add_argument('--sort', required=False)
     parser.add_argument('--mapping', required=False, default='mapping.yaml')
+    parser.add_argument('--language', required=False)
     args = parser.parse_args()
+
+    if args.mode == 'token-id' and args.language is None:
+        print("Mode token-id requires a language file with --language")
+        exit(-1)
+
     main(args)
