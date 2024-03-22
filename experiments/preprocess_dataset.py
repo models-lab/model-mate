@@ -13,16 +13,26 @@ SPECIAL_TOKEN = "<URIPRE>"
 logger = logging.getLogger()
 
 
-@hydra.main(version_base=None, config_path="conf", config_name="config")
-def main(cfg: DictConfig):
-    with open(os.path.join(cfg['dataset']['path'], cfg['dataset']['full_dataset'])) as f:
-        contents = f.readlines()
+def apply_hiding_rules(contents, hide_rules):
+    # TODO: This is applying the URIPRE rule in a hardcoded way, do this well
     new_contents = []
     for metamodel in contents:
         new_metamodel = re.sub('"([^"]*)"', SPECIAL_TOKEN, metamodel)
         if new_metamodel[0] == ' ':
             new_metamodel = new_metamodel[1:]
         new_contents.append(new_metamodel)
+    return new_contents
+
+
+@hydra.main(version_base=None, config_path="conf", config_name="config")
+def main(cfg: DictConfig):
+    with open(os.path.join(cfg['dataset']['path'], cfg['dataset']['full_dataset'])) as f:
+        contents = f.readlines()
+
+    if "hide_rules" in cfg.language:
+        new_contents = apply_hiding_rules(contents, cfg.language.hide_rules)
+    else:
+        new_contents = contents
 
     # Splitting dataset 70/20/10
     train_val, test = train_test_split(new_contents, test_size=0.20, random_state=cfg['run']['seed'])

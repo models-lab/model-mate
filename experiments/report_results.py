@@ -184,9 +184,9 @@ def compute_single_result(args, mode, result_file):
     raise ValueError("Invalid mode: " + mode)
 
 
-def compute_results_by_mode(result_folder, mode):
+def compute_results_by_mode(result_folder, mode, result_type_prefix = ''):
     folders = result_folder.split(',')
-    files = [(os.path.basename(f), os.path.join(f, 'results_' + mode + '.csv')) for f in folders if not f.endswith('.csv')]
+    files = [(os.path.basename(f), os.path.join(f, f'results_{result_type_prefix}' + mode + '.csv')) for f in folders if not f.endswith('.csv')]
     files += [(os.path.basename(os.path.dirname(f)), f) for f in folders if f.endswith('.csv')]
 
     rows = []
@@ -201,11 +201,11 @@ def compute_results_by_mode(result_folder, mode):
     return df
 
 
-def compute_all_results(args, result_folder):
+def compute_all_results(args, result_folder, result_type_prefix=''):
     modes = ['token', 'token-id', 'line', 'block']
     df = compute_results_by_mode(result_folder, modes[0])
     for mode in modes[1:]:
-        df2 = compute_results_by_mode(result_folder, mode)
+        df2 = compute_results_by_mode(result_folder, mode, result_type_prefix)
         df = pd.merge(df, df2, on='Model', how='outer')
 
     df = format_dataframe(args, df)
@@ -216,7 +216,7 @@ def compute_all_results(args, result_folder):
 def compute_several_results(args, result_folder):
     folders = result_folder.split(',')
     # files = [(os.path.basename(f), os.path.join(f, 'results_' + args.mode + '.csv')) for f in folders]
-    files = [(os.path.basename(f), os.path.join(f, 'results_' + mode + '.csv')) for f in folders if not f.endswith('.csv')]
+    files = [(os.path.basename(f), os.path.join(f, 'results_' + args.mode + '.csv')) for f in folders if not f.endswith('.csv')]
     files += [(os.path.basename(os.path.dirname(f)), f) for f in folders if f.endswith('.csv')]
 
 
@@ -263,6 +263,8 @@ def main(args):
     if "," in args.results:
         if args.mode == 'all':
             compute_all_results(args, args.results)
+        elif args.mode == 'all-sample':
+            compute_all_results(args, args.results, result_type_prefix='sampled_')
         else:
             compute_several_results(args, args.results)
     else:
@@ -271,7 +273,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parse dataset')
-    parser.add_argument('--mode', type=str, default='token-id', choices=['all', 'token-id', 'line', 'token', 'block'])
+    parser.add_argument('--mode', type=str, default='token-id', choices=['all', 'all-sample', 'token-id', 'line', 'token', 'block'])
     parser.add_argument('--results', required=True)
     parser.add_argument('--sort', required=False)
     parser.add_argument('--mapping', required=False, default='mapping.yaml')
