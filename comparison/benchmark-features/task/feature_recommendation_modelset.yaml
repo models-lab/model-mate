@@ -6,5 +6,5 @@ val_split: 0.15
 # This means now, take the 100% of the test dataset
 #test_split: 1.0
 test_split: 1.0
-test_dataset: genmymodel_ecore_deduplicated
+test_dataset: modelset_ecore_deduplicated
 topk: 5

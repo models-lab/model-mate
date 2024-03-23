@@ -1,0 +1,9 @@
+name: Filter out invalid Ecore models
+task: transform
+
+dataset:
+  format: xmi
+
+environment:
+  docker: Dockerfile
+  run: java -cp /java/target/filter-invalid-ecore-0.0.1-SNAPSHOT-jar-with-dependencies.jar modelmate.modelxglue.Main -r {root} 

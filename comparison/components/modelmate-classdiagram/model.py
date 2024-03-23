@@ -26,16 +26,21 @@ class Model(ModelImplementation):
         from transformers import AutoTokenizer, AutoModelForCausalLM
         #model_path = os.path.join(inout.original, 'model', 'graphical-distil-gpt2')
         #model_path = os.path.join(inout.original, 'model', 'codeparrot-classdiagram')
+
+        context_length = 512
         model_path = os.path.join(inout.original, 'model', 'codeparrot-cd-shuffled')
+
+        #context_length = 1024
+        #model_path = os.path.join(inout.original, 'model', 'codegen-multi-cd-shuffled')
 
         model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto")
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         cfg = {
             "params": {
-                "context_length": 512
+                "context_length": context_length
             },
             "evaluation": {
-                "max_new_tokens": 64,
+                "max_new_tokens": 16,
                 "num_beams": 10,
                 "mode": "line",
                 "samples_token_id": 5,

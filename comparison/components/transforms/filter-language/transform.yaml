@@ -1,0 +1,9 @@
+name: Filter by language
+task: transform
+
+dataset:
+  format: xmi
+
+environment:
+  docker: Dockerfile
+  run: java -cp /java/target/filter-language-0.0.1-SNAPSHOT-jar-with-dependencies.jar modelmate.modelxglue.Main -r {root} -language english

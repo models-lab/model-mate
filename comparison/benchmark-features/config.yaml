@@ -5,3 +5,4 @@ defaults:
   - model: svm_tfidf
   - dataset: modelset_ecore_deduplicated
   - task: feature_recommendation
+  - transform: default

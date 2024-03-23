@@ -1,0 +1,3 @@
+reference: "$COMPONENTS/recommendation/knn/model.yaml"
+ml_model: "KNN"
+encoding_features: "XMI"
