@@ -1,5 +1,9 @@
 name: emfatic
 keywords: ["class", "attr", "ref", "extends", "package", "val", "]"]
 
+block:
+  start: '{'
+  end: "}"
+
 hide_rules:
   - URIPRE: '"([^"]*)"'

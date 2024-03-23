@@ -105,7 +105,8 @@ def get_suggestions_next_line(model, tokenizer, input, cfg):
 
 
 def get_suggestions_next_block(model, tokenizer, input, cfg):
-    generated_new_tokens = generate(model, tokenizer, input, cfg, None, 'Ġ}')
+    end_token = 'Ġ' + cfg.language.block.end # Ġ}
+    generated_new_tokens = generate(model, tokenizer, input, cfg, None, end_token)
 
     suggestions = []
     for k, new_tokens in enumerate(generated_new_tokens):

@@ -1,1 +1,10 @@
 name: xtext
+block:
+  start: ':'
+  #start:
+  #  regex: [ <EOL> '[a-zA-Z0-9_]+', ('returns', '[a-zA-Z0-9_]+'), ':' ]
+  #  result: 3
+  #  tests:
+  #    - value: 'name : String'
+  #      expected: 'name
+  end: ";"

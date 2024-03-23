@@ -109,6 +109,13 @@ python run_inference.py --multirun dataset=ecore_line model=codegen_multi,codepa
 python run_inference.py --multirun dataset=ecore_line model=codegen_multi,codeparrot_multi,gpt2-large evaluation.mode=line evaluation.max_new_tokens=32 params.context_length=512 evaluation.sampled_test=data/temp/ecore_line/parsed_test_line-sample-1000.json language=emfatic
 ```
 
+#### Xtext
+
+```bash
+ python run_inference.py --multirun dataset=xtext_mar_line model=gpt2,codegen_multi evaluation.mode=line evaluation.max_new_tokens=64 params.context_length=512
+ 
+```
+
 ### Reporting results
 
 ```bash

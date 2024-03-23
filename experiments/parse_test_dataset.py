@@ -109,17 +109,22 @@ def generate_samples_regex(sample, language):
     return output
 
 
-def generate_samples_block(sample):
+def generate_samples_block(sample, block_spec):
+    start = block_spec.start
+    end = block_spec.end
+
     tokens = sample.split(" ")
     pairs = []
     f_index = None
     for j, t in enumerate(tokens):
-        if t == "{":
+        if t == start:
             f_index = j
-        elif t == "}":
+        elif t == end and f_index is not None:
             context = " ".join(tokens[0: f_index + 1])
             expected = " ".join(tokens[f_index + 1: j + 1])
+
             pairs.append((context, expected))
+            f_index = None
     return pairs
 
 
@@ -188,7 +193,7 @@ def main(cfg: DictConfig):
     elif cfg['evaluation']['mode'] == 'block':
         output = []
         for sample in tqdm(dataset["text"], desc='Parsing'):
-            pairs_temp = generate_samples_block(sample)
+            pairs_temp = generate_samples_block(sample, cfg.language.block)
             if len(pairs_temp) > cfg['evaluation']['samples_block']:
                 pairs_temp = random.sample(pairs_temp, cfg['evaluation']['samples_block'])
             output += pairs_temp

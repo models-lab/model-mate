@@ -186,6 +186,8 @@ def compute_single_result(args, mode, result_file):
 
 def compute_results_by_mode(result_folder, mode, result_type_prefix = ''):
     folders = result_folder.split(',')
+    folders = [f[:-1] if f.endswith('/') else f for f in folders]
+    
     files = [(os.path.basename(f), os.path.join(f, f'results_{result_type_prefix}' + mode + '.csv')) for f in folders if not f.endswith('.csv')]
     files += [(os.path.basename(os.path.dirname(f)), f) for f in folders if f.endswith('.csv')]
 
@@ -215,7 +217,8 @@ def compute_all_results(args, result_folder, result_type_prefix=''):
 
 def compute_several_results(args, result_folder):
     folders = result_folder.split(',')
-    # files = [(os.path.basename(f), os.path.join(f, 'results_' + args.mode + '.csv')) for f in folders]
+    folders = [f[:-1] if f.endswith('/') else f for f in folders]
+
     files = [(os.path.basename(f), os.path.join(f, 'results_' + args.mode + '.csv')) for f in folders if not f.endswith('.csv')]
     files += [(os.path.basename(os.path.dirname(f)), f) for f in folders if f.endswith('.csv')]
 

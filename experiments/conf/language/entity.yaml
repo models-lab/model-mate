@@ -1,5 +1,5 @@
 name: entity
-keywords: ['package', 'entity']
+keywords: ['entity', 'op']
 matches:
   'attr_name':
     regex: ['[a-zA-Z0-9_]+', ':', '[a-zA-Z0-9_]+']
@@ -13,3 +13,7 @@ matches:
     tests:
       - value: ': String <EOL>'
         expected: 'String'
+
+block:
+  start: '{'
+  end: "}"
