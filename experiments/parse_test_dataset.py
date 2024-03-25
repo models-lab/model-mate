@@ -139,8 +139,9 @@ def generate_samples_token(sample):
 
 def generate_samples_line(sample):
     all_lines = sample.split(f' {EOL_TOKEN} ')
-    return [(f' {EOL_TOKEN} '.join(all_lines[0:j + 1]) + f' {EOL_TOKEN}', line) for j, line in
+    pairs = [(f' {EOL_TOKEN} '.join(all_lines[0:j + 1]) + f' {EOL_TOKEN}', line) for j, line in
             enumerate(all_lines[1:]) if line not in SPECIAL_TOKEN_IGNORE]
+    return [(context, line) for context, line in pairs if len(line) > 2]
 
 
 
