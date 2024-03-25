@@ -113,6 +113,34 @@ def main(args):
 
         pd_results = pd.DataFrame.from_dict(final_output)
         pd_results.to_csv(args.results)
+    elif args.mode == 'token':
+        final_output = {
+            "input": [],
+            "expected": [],
+            "suggestions": []
+        }
+        encoding = tiktoken.encoding_for_model('gpt-3.5-turbo-instruct')
+        pt = [x for x in parsed_test if len(encoding.encode(x[0])) <= 3000]
+        if len(pt) > 1000:
+            pt = random.sample(pt, 1000)
+        for input, expected in tqdm(pt, desc=f'Inference'):
+            full_prompt = prompt + input
+            response = openai.Completion.create(
+                model="gpt-3.5-turbo-instruct",  # You can choose a different engine based on your needs
+                # messages=messages+[dict],
+                prompt=full_prompt,
+                max_tokens=8,  # Adjust as needed
+                n=1,  # Number of completions to generate
+                stop=None,  # You can provide custom stop criteria
+                temperature=0
+            )
+            time.sleep(0.3)
+            final_output["input"].append(input)
+            final_output["expected"].append(expected)
+            final_output["suggestions"].append(response.choices[0].text.strip().split(' ')[0])
+
+        pd_results = pd.DataFrame.from_dict(final_output)
+        pd_results.to_csv(args.results)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parse dataset')
