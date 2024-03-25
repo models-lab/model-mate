@@ -34,6 +34,9 @@ def main(cfg: DictConfig):
     else:
         new_contents = contents
 
+
+    print("Total samples: ", len(new_contents))
+    
     # Splitting dataset 70/20/10
     train_val, test = train_test_split(new_contents, test_size=0.20, random_state=cfg['run']['seed'])
     train, val = train_test_split(train_val, test_size=0.1 / 0.8, random_state=cfg['run']['seed'])
@@ -45,10 +48,10 @@ def main(cfg: DictConfig):
                                       os.path.join(train_data_folder, cfg['run']['val_file']),
                                       os.path.join(train_data_folder, cfg['run']['test_file'])],
                                      [train, val, test]):
-        with open(filename, "a") as f:
+        with open(filename, "w") as f:
             f.writelines(filecontent)
 
-        logger.info(f"Output written to: {filename}")
+        logger.info(f"Output written to: {filename}. Samples = {len(filecontent)}")
 
 
 if __name__ == '__main__':
