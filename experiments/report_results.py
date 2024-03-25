@@ -144,7 +144,14 @@ def compute_single_result(args, mode, result_file):
     elif args.mode == 'performance':
         quartiles = results["predlen"].quantile([0.25, 0.5, 0.75])
         print(quartiles)
-        print(np.mean(results["time"]))
+
+        times = results['time'] * 1000
+
+        print("Average:", np.mean(times))
+        print("Std:", np.std(times))
+        print("Median:", np.median(times))
+        print("Min:", np.min(times))
+        print("Max:", np.max(times))
 
         # Create bucket intervals based on quartiles
         bucket_intervals = [(0, quartiles[0.25]), (quartiles[0.25], quartiles[0.5]),
@@ -169,7 +176,7 @@ def compute_single_result(args, mode, result_file):
 
         # Calculate mean time for each bucket
         mean_times = {interval: bucket["sum_time"] / bucket["count"] for interval, bucket in buckets.items()}
-
+        print(mean_times)
         # Plot bar plots for each bucket
         plt.figure(figsize=(10, 6))
         for interval, mean_time in mean_times.items():
