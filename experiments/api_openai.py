@@ -10,7 +10,7 @@ import tiktoken
 
 def main(args):
     random.seed(args.seed)
-    KEYWORDS = ["class", "attr", "ref", "extends", "package", "val"]
+    KEYWORDS = ["class", "attr", "ref", "extends", "package", "val", "]"]
     dataset = load_dataset("text", data_files={"test": args.test_set})["test"]
     with open(args.parsed_test) as f:
         parsed_test = json.load(f)
