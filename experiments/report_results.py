@@ -30,7 +30,10 @@ def load_language(language_path: str):
 
 
 def compute_single_result(args, mode, result_file):
-    language = load_language(args.language)
+    language = None
+    if mode != 'performance':
+        language = load_language(args.language)
+
     try:
         results = pd.read_csv(result_file)
     except:
@@ -276,7 +279,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parse dataset')
-    parser.add_argument('--mode', type=str, default='token-id', choices=['all', 'all-sample', 'token-id', 'line', 'token', 'block'])
+    parser.add_argument('--mode', type=str, default='token-id', choices=['all', 'all-sample', 'token-id', 'line', 'token', 'block', 'performance'])
     parser.add_argument('--results', required=True)
     parser.add_argument('--sort', required=False)
     parser.add_argument('--mapping', required=False, default='mapping.yaml')
