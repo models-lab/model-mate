@@ -33,7 +33,15 @@ def main(args):
         with open(args.output, 'w') as file:
             json.dump(pt, file)
 
+    elif args.mode == 'token':        
+        encoding = tiktoken.encoding_for_model('gpt-3.5-turbo-instruct')
+        pt = [x for x in parsed_test if len(encoding.encode(x[0])) <= 3500]
+        if len(pt) > args.num_samples:
+            pt = random.sample(pt, args.num_samples)
+        with open(args.output, 'w') as file:
+            json.dump(pt, file)
 
+            
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parse dataset')
     parser.add_argument('--mode', type=str, default='token-id', choices=['token-id', 'token', 'line', 'block'])
