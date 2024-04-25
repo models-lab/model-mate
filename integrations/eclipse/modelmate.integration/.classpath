@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/unirest-java-3.6.00.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/commons-csv-1.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/commons-io-2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/gson-2.8.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/httpasyncclient-4.1.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/httpclient-4.5.11.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/httpcore-4.4.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/httpcore-nio-4.4.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/httpmime-4.5.11.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/jackson-annotations-2.10.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/jackson-core-2.10.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unirest/jackson-databind-2.10.2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

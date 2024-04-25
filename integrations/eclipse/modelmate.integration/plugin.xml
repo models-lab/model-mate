@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="modelmate.integration.language" name="language" schema="schema/modelmate.integration.exsd"/>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="modelmate"
+            name="ModelMate">
+      </category>
+      <view
+            category="modelmate"
+            class="modelmate.integration.views.AutocompletionView"
+            icon="icons/logo24.png"
+            id="modelmate.integration.views.AutocompletionView"
+            inject="true"
+            name="ModelMate completions">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="modelmate.integration.commands.category"
+            name="Model Mate">
+      </category>
+      <command
+            categoryId="modelmate.integration.commands.category"
+            id="modelmate.integration.commands.applkyAutocompletion"
+            name="Apply autocompletion">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="modelmate.integration.handlers.ApplyAutocompletion"
+            commandId="modelmate.integration.commands.applyAutocompletion">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="modelmate.integration.commands.applyAutocompletion"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+x">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="modelmate.integration.menus.sampleMenu"
+               label="Sample Menu"
+               mnemonic="M">
+            <command
+                  commandId="modelmate.integration.commands.applyAutocompletion"
+                  id="modelmate.integration.menus.sampleCommand"
+                  mnemonic="S">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="modelmate.integration.toolbars.sampleToolbar">
+            <command
+                  commandId="modelmate.integration.commands.applyAutocompletion"
+                  icon="icons/sample.png"
+                  id="modelmate.integration.toolbars.sampleCommand"
+                  tooltip="Say hello world">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+
+</plugin>
