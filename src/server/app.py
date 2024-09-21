@@ -6,7 +6,7 @@ import time
 
 
 class FlaskModelMateApp:
-    def __init__(self, model: ModelInference, app: Flask = None):
+    def __init__(self, model: ModelInference, host='0.0.0.0', port=8080, app: Flask = None):
         if app is None:
             app = Flask(__name__)
             # Load configuration from environment variables
@@ -14,6 +14,9 @@ class FlaskModelMateApp:
 
         self.app = app
         self.model = model
+
+        self.host = host
+        self.port = port
 
         @app.post("/recommend/fragment")
         def recommend_fragment():
@@ -81,4 +84,4 @@ class FlaskModelMateApp:
             return jsonify({"suggestions": suggestions, "time": end - start, "text": text})
 
     def run(self):
-        self.app.run(host='0.0.0.0', port=8080)
+        self.app.run(host=self.host, port=self.port)
