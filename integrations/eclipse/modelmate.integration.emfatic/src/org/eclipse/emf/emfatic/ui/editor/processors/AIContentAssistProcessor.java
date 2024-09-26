@@ -1,7 +1,6 @@
 package org.eclipse.emf.emfatic.ui.editor.processors;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -14,16 +13,21 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import modelmate.integration.API;
 import modelmate.integration.API.SuggestionResult;
+import modelmate.integration.Activator;
 import modelmate.integration.emfatic.EmfaticTokenizer;
+import modelmate.integration.extensions.LanguageExtension;
 
 public class AIContentAssistProcessor implements IContentAssistProcessor {
 
 	private Mode mode;
 	private String kind;
+	private LanguageExtension language;
 	
 	public AIContentAssistProcessor(Mode mode, String kind) {
 		this.mode = mode;
 		this.kind = kind;
+		
+		this.language = Activator.getDefault().getLanguageExtension("emf");
 	}
 	
 	public AIContentAssistProcessor() {
@@ -81,7 +85,8 @@ public class AIContentAssistProcessor implements IContentAssistProcessor {
 			return null;
 		}
 		
-		API api = new API();
+		
+		API api = new API(language.getModelMateServerURL());
 		EmfaticTokenizer tokenizer = new EmfaticTokenizer();
 		
 		String context = tokenizer.tokenize(previous);

@@ -5,8 +5,12 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.osgi.framework.Bundle;
 
 import modelmate.integration.Activator;
 import modelmate.integration.language.PrettyPrinter;
@@ -30,7 +34,17 @@ public class ExtensionPointUtils {
 				} catch (CoreException e) {
 					// Ignore
 				}
-				languageExtensions.add(new LanguageExtension(extension, tokenizer, printer));
+			
+				IContributor contributor = ce.getContributor();
+				String contributorPluginId = contributor.getName();
+				Bundle bundle = Platform.getBundle(contributorPluginId);
+				if (bundle != null && bundle.getState() == Bundle.ACTIVE) {
+					ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, bundle.getSymbolicName());
+
+					languageExtensions.add(new LanguageExtension(extension, tokenizer, printer, preferenceStore));
+				}
+
+				
 			} catch (CoreException e) {
 				e.printStackTrace();
 			}

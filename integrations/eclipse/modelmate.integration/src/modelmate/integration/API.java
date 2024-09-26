@@ -13,10 +13,16 @@ import kong.unirest.Unirest;
 import kong.unirest.json.JSONObject;
 
 public class API {
-	// private String url = "models-lab.inf.um.es";
-	private String url = "127.0.0.1";
-	private int port = 8080;
+	private String url;
 	
+	public API() {
+		this("http://127.0.0.1:8080");
+	}
+	
+	public API(String url) {
+		this.url = url;
+	}
+
 	public SingleResult recommendFragment(String text) {
 		Map<String, String> value = new HashMap<>();
 		value.put("context", text);
@@ -92,7 +98,7 @@ public class API {
 
 	
 	private String getURL(String str) {
-		return "http://" + url + ":" + port + "/" + str;
+		return url + "/" + str;
 	}
 	
 	public static final class SingleResult {

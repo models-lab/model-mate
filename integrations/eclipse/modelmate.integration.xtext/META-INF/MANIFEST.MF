@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Xtext
 Bundle-SymbolicName: modelmate.integration.xtext;singleton:=true
 Bundle-Version: 1.0.0.qualifier
+Export-Package: modelmate.integration.xtext.generate
 Bundle-Activator: modelmate.integration.xtext.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

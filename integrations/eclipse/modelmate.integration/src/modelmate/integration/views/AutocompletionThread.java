@@ -92,7 +92,8 @@ public class AutocompletionThread extends Thread {
 		@Override
 		public Void call() throws Exception {
 			String tokenized = lang.getTokenizer().tokenize(fragment);
-			SingleResult result = new API().recommendFragment(tokenized);
+			String url = lang.getModelMateServerURL();
+			SingleResult result = new API(url).recommendFragment(tokenized);
 			consumer.accept(result);
 			return null;
 		}
