@@ -5,8 +5,10 @@ Bundle-SymbolicName: modelmate.integration;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: modelmate.integration,
  modelmate.integration.generators,
- modelmate.integration.language
-Import-Package: jakarta.inject;version="[2.0.0,3.0.0)"
+ modelmate.integration.language,
+ modelmate.integration.preferences
+Import-Package: jakarta.inject;version="[2.0.0,3.0.0)",
+ org.eclipse.jface.text
 Bundle-Activator: modelmate.integration.Activator
 Bundle-ClassPath: lib/unirest/commons-csv-1.7.jar,
  lib/unirest/commons-io-2.6.jar,
@@ -24,13 +26,10 @@ Bundle-ClassPath: lib/unirest/commons-csv-1.7.jar,
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ui.editors,
- org.eclipse.xtext;bundle-version="2.33.0",
- org.eclipse.xtext.ui;bundle-version="2.33.0",
- org.eclipse.xtext.ui.codemining;bundle-version="2.33.0",
- org.eclipse.xtext.ui.codetemplates;bundle-version="2.33.0",
  org.apache.commons.logging;bundle-version="1.2.0",
  org.eclipse.ui.ide;bundle-version="3.22.0",
- org.eclipse.ui.workbench
+ org.eclipse.ui.workbench,
+ org.eclipse.core.resources;bundle-version="3.20.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: modelmate.integration
 Bundle-ActivationPolicy: lazy
