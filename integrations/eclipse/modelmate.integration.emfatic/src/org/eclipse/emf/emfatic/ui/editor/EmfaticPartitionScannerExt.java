@@ -1,7 +1,6 @@
 package org.eclipse.emf.emfatic.ui.editor;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 
 public class EmfaticPartitionScannerExt {
 	public final static String packagePart = "packagePart";

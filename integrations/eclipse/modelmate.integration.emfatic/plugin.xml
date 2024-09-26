@@ -1,25 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         point="modelmate.integration.language">
-      <language
-            extension="emf"
-            prettyprinter="modelmate.integration.emfatic.EmfaticPrettyPrinter"
-            tokenizer="modelmate.integration.emfatic.EmfaticTokenizer">
-      </language>
-   </extension>
+	<extension
+		point="modelmate.integration.language">
+		<language
+			extension="emf"
+			prettyprinter="modelmate.integration.emfatic.EmfaticPrettyPrinter"
+			tokenizer="modelmate.integration.emfatic.EmfaticTokenizer">
+		</language>
+	</extension>
 
-   <extension
-         point="org.eclipse.ui.editors">
-      <editor
-            name="EmfaticEditor"
-            extensions="emf"
-            icon="icons/emfatic.png"
-            class="org.eclipse.emf.emfatic.ui.editor.ModelMateEmfaticEditor"
-            contributorClass="org.eclipse.emf.emfatic.ui.editor.EmfaticEditorActionContributor"
-            id="org.eclipse.emf.emfatic.ui.editor.EmfaticEditor">
-      </editor>
-   </extension>
+	<extension
+		point="org.eclipse.ui.editors">
+		<editor
+			name="EmfaticEditor"
+			extensions="emf"
+			icon="icons/emfatic.png"
+			class="org.eclipse.emf.emfatic.ui.editor.ModelMateEmfaticEditor"
+			contributorClass="org.eclipse.emf.emfatic.ui.editor.EmfaticEditorActionContributor"
+			id="org.eclipse.emf.emfatic.ui.editor.EmfaticEditor">
+		</editor>
+	</extension>
 
+	<extension
+		point="org.eclipse.ui.preferencePages">
+		<page
+			class="modelmate.integration.emfatic.preferences.ModelMateEmfaticPreferencePage"
+			id="modelmate.integration.preferences.ModelMateEmfaticPreferencePage"
+			category="modelmate.integration.preferences.ModelMatePreferencePage"
+			name="Emfatic">
+		</page>
+	</extension>
+
+	<extension
+		point="org.eclipse.core.runtime.preferences">
+		<initializer
+			class="modelmate.integration.emfatic.preferences.ModelMateEmfaticPreferenceInitializer">
+		</initializer>
+	</extension>
 </plugin>

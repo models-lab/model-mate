@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.Token;
-import org.eclipse.xtext.XtextStandaloneSetup;
 import org.eclipse.xtext.parser.antlr.Lexer;
 
 import com.google.inject.Injector;
@@ -18,15 +17,16 @@ import modelmate.integration.generators.CodeXGlueOutput.PieceOfCode;
 
 public class Generator {
 
-	private static Injector injector = null;
+	private Injector injector;
 
-	private static Injector getInjector() {
-		if (injector == null) {
-			injector = new XtextStandaloneSetup().createInjectorAndDoEMFRegistration();
-		}
-		return injector;
+	public Generator(Injector injector) {
+		this.injector = injector;
 	}
 
+	public Injector getInjector() {
+		return injector;
+	}
+	
 	protected List<String> getTokens(String s) throws IOException {
 		Lexer x = getInjector().getInstance(Lexer.class);
 		x.setCharStream(new ANTLRInputStream(new ByteArrayInputStream(s.getBytes())));

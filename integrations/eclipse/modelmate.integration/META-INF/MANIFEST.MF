@@ -4,6 +4,7 @@ Bundle-Name: Integration
 Bundle-SymbolicName: modelmate.integration;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: modelmate.integration,
+ modelmate.integration.extensions,
  modelmate.integration.generators,
  modelmate.integration.language,
  modelmate.integration.preferences

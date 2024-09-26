@@ -68,10 +68,24 @@
                   commandId="modelmate.integration.commands.applyAutocompletion"
                   icon="icons/sample.png"
                   id="modelmate.integration.toolbars.sampleCommand"
-                  tooltip="Say hello world">
+                  tooltip="Autocomplete!">
             </command>
          </toolbar>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="modelmate.preferences.internal.ModelMatePreferencePage"
+            id="modelmate.integration.preferences.ModelMatePreferencePage"
+            name="ModelMate">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="modelmate.preferences.internal.PreferenceInitializer">
+      </initializer>
    </extension>
 
 </plugin>
