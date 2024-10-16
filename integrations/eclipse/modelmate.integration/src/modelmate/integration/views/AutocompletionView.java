@@ -267,6 +267,7 @@ public class AutocompletionView extends ViewPart implements ISelectionListener {
 			pretty = pretty.replace("\n", "\\n");
 			System.out.println("Pretty");
 			System.out.println(pretty);
+			pretty = pretty.replace("\"", "\\\"");
 			fBrowser.execute("setSuggestion(\"" + pretty + "\");");
 			//fBrowser.execute("setSuggestion(\"" + result.getText() + " | " + result.getTime() + "\");");
 		});

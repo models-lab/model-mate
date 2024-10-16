@@ -9,9 +9,9 @@ public abstract class AbstractModelMateLanguagePreferencePage
 	extends FieldEditorPreferencePage
 	implements IWorkbenchPreferencePage {
 
-	public AbstractModelMateLanguagePreferencePage(String language) {
+	public AbstractModelMateLanguagePreferencePage(String language, IPreferenceStore preferenceStore) {
 		super(GRID);
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		setPreferenceStore(preferenceStore);
 		setDescription("Language preferences for " + language);
 	}
 	
