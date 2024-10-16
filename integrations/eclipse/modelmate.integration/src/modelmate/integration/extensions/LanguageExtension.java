@@ -36,6 +36,9 @@ public class LanguageExtension {
 	
 	public String getModelMateServerURL() {
 		String url = preferenceStore.getString(PreferenceConstants.P_URL);
+		if (url.trim().isEmpty()) {
+			return "http://0.0.0.0:8080";
+		}
 		return url;
 	}
 }
