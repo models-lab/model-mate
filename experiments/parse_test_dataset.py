@@ -3,9 +3,11 @@ import logging
 import os
 import random
 from collections import defaultdict
+from typing import Optional
 
 import hydra
-from datasets import load_dataset
+from datasets.load import load_dataset
+from datasets import Dataset
 from omegaconf import DictConfig
 from tqdm import tqdm
 
@@ -52,8 +54,8 @@ class Language:
     """A simple specification of a language"""
 
     def __init__(self, cfg):
-        self.keywords = cfg.keywords if 'keywords' in cfg else []
-        self.matchers = [TokenMatcher(name, m) for name, m in cfg.matches.items()] if 'matches' in cfg else []
+        self.keywords: list[str] = cfg.keywords if 'keywords' in cfg else []
+        self.matchers: list[TokenMatcher] = [TokenMatcher(name, m) for name, m in cfg.matches.items()] if 'matches' in cfg else []
         for m in self.matchers:
             m.do_self_test()
 
@@ -63,7 +65,7 @@ class Language:
 
     def match(self, token_sequence, idx):
         for m in self.matchers:
-            matched_string = m.match(token_sequence, idx)
+            matched_string: Optional[str] = m.match(token_sequence, idx)
             if matched_string is not None:
                 return matched_string, m
         return None, None
@@ -128,7 +130,7 @@ def generate_samples_block(sample, block_spec):
     return pairs
 
 
-SPECIAL_TOKEN_IGNORE = [EOL_TOKEN, BOS_TOKEN, EOS_TOKEN, UNK_TOKEN, SPECIAL_TOKEN]
+SPECIAL_TOKEN_IGNORE: 'list[str]' = [EOL_TOKEN, BOS_TOKEN, EOS_TOKEN, UNK_TOKEN, SPECIAL_TOKEN]
 
 
 def generate_samples_token(sample):
@@ -149,8 +151,8 @@ def generate_samples_line(sample):
 def main(cfg: DictConfig):
     random.seed(cfg['run']['seed'])
 
-    train_data_folder = common.get_train_data_folder(cfg)
-    dataset = load_dataset("text",
+    train_data_folder: str = common.get_train_data_folder(cfg)
+    dataset: Dataset = load_dataset("text",
                            data_files={"test": os.path.join(train_data_folder, cfg['run']['test_file'])})["test"]
 
     logging.getLogger().info(f"Generate parsed test dataset mode={cfg['evaluation']['mode']}")
@@ -158,7 +160,7 @@ def main(cfg: DictConfig):
     language = Language(cfg.language)
 
     if cfg['evaluation']['mode'] == 'token-id':
-        samples_per_token_id = cfg['evaluation']['samples_token_id']
+        samples_per_token_id: int = cfg['evaluation']['samples_token_id']
 
         # token id
         output = defaultdict(list)
