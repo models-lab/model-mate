@@ -21,6 +21,7 @@ jinja2
 jsonpointer
 jsonschema
 markupsafe
+matplotlib
 multiprocess
 nltk
 numpy
@@ -40,6 +41,7 @@ pyrsistent
 pysocks
 python-dateutil
 python-json-logger
+python-Levenshtein
 pyyaml
 regex
 requests
