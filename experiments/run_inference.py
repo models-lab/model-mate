@@ -37,7 +37,8 @@ def main(cfg: DictConfig):
         with open(os.path.join(train_data_folder, f"parsed_test_{cfg['evaluation']['mode']}.json")) as f:
             parsed_test = json.load(f)
 
-    model_inference = ModelInference(cfg['run']['best_model_folder'])
+    model_folder = os.path.join(common.get_trained_model_folder(cfg), cfg['run']['best_model_folder'])
+    model_inference = ModelInference(model_folder)
 
     performance = {
         "time": [],
