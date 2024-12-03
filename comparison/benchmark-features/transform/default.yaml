@@ -1,0 +1,7 @@
+test_pipeline:
+  - id: filter_invalid_ecore
+    reference: "$COMPONENTS/transforms/filter-invalid-ecore"
+  - id: filter_language
+    reference: "$COMPONENTS/transforms/filter-language"
+    parameters:
+      language: english

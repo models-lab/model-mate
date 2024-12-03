@@ -1,0 +1,8 @@
+seed: 123
+output: results/${task.evaluation_strategy}/${model.ml_model}-${model.current_args:'ARGS'}-${task.task_name}-${dataset.dataset_name}.json
+cachedir: cache
+defaults:
+  - model: svm_tfidf
+  - dataset: modelset_ecore_deduplicated
+  - task: feature_recommendation
+  - transform: default

@@ -1,0 +1,5 @@
+reference: "$COMPONENTS/recommendation/ecorebert_finetuned/model.yaml"
+ml_model: "ECOREBERTFINETUNED"
+encoding_features: "XMI"
+hyperparameters:
+  dummy: ['nothing']

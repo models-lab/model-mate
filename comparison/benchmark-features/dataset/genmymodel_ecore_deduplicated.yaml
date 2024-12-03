@@ -1,0 +1,4 @@
+dataset_name: "genmymodel_ecore_deduplicated"
+model_type: ecore
+dataset_hg: "models-lab/mar-ecore-genmymodel"
+include_duplicates: false

@@ -1,0 +1,4 @@
+dataset_name: "ecore555_full"
+model_type: ecore
+dataset_hg: "antolin/ecore_555"
+include_duplicates: true

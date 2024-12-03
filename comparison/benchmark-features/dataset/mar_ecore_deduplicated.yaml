@@ -1,0 +1,4 @@
+dataset_name: "mar_ecore_deduplicated"
+model_type: ecore
+dataset_hg: "models-lab/mar-ecore-github"
+include_duplicates: false
