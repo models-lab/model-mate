@@ -1,12 +1,13 @@
-import logging
+from logging import Logger, getLogger
 import os
 from pathlib import Path
 
 import hydra
-from datasets import load_dataset
+from datasets.load import load_dataset
 from omegaconf import DictConfig
 from transformers import AutoTokenizer, DataCollatorForLanguageModeling, TrainingArguments, Trainer, GPT2LMHeadModel, \
     AutoConfig, EarlyStoppingCallback, GPT2TokenizerFast, AutoModelForCausalLM
+from transformers.tokenization_utils_base import BatchEncoding
 
 import common
 from preprocess_dataset import SPECIAL_TOKEN
@@ -19,14 +20,14 @@ UNK_TOKEN = '<unk>'
 
 def check_tokens(tokenizer):
     for special in [SPECIAL_TOKEN, EOL_TOKEN, UNK_TOKEN, EOS_TOKEN, BOS_TOKEN]:
-        logger = logging.getLogger()
+        logger: Logger = getLogger()
         logger.info(f'Checking token {special}: {len(tokenizer.tokenize(special)) == 1}')
         assert len(tokenizer.tokenize(special)) == 1
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
-    logger = logging.getLogger()    
+    logger: Logger = getLogger()
     logger.info(f'Training with: learning_rate = {cfg["params"]["learning_rate"]}')
 
     train_data_folder = common.get_train_data_folder(cfg)
@@ -57,7 +58,7 @@ def main(cfg: DictConfig):
     context_length = cfg['params']['context_length']
 
     def tokenize(element):
-        outputs = tokenizer(
+        outputs: BatchEncoding = tokenizer(
             element["text"],
             truncation=True,
             max_length=context_length,
