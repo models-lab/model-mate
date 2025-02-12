@@ -1,4 +1,0 @@
-epochs: 10
-scheduler: linear
-context_length: 512
-batch_size: 2
