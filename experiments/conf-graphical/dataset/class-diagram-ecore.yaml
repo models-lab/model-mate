@@ -1,0 +1,4 @@
+level: line
+path: data/dataset/
+full_dataset: class-diagram-ecore-dedup.txt
+name: class_diagram_ecore
