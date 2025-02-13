@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 from inference import ModelInference
 
@@ -13,6 +14,7 @@ class FlaskModelMateApp:
             app.config.from_prefixed_env()
 
         self.app = app
+        CORS(app)
         self.model = model
 
         self.host = host
