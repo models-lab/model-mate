@@ -117,8 +117,9 @@ class ModelInference(BaseInference):
             suggestions.append(generated)
         return suggestions
 
-    def get_suggestions_next_block(self, input, **kwargs):
-        generated_new_tokens = self.generate(input, criteria=None, end_token='Ġ}', **self.to_params(kwargs))
+    def get_suggestions_next_block(self, input, end_token = '}', **kwargs):
+        #generated_new_tokens = self.generate(input, criteria=None, end_token='Ġ}', **self.to_params(kwargs))
+        generated_new_tokens = self.generate(input, criteria=None, end_token='Ġ' + end_token, **self.to_params(kwargs))
 
         suggestions = []
         for k, new_tokens in enumerate(generated_new_tokens):
