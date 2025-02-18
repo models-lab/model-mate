@@ -151,11 +151,7 @@ def generate_samples_line(sample):
 def main(cfg: DictConfig):
     random.seed(cfg['run']['seed'])
 
-<<<<<<< HEAD
     train_data_folder: str = common.get_train_data_folder(cfg)
-=======
-    train_data_folder = common.get_train_data_folder(cfg)
->>>>>>> 03ad019 (Typing.)
     dataset: Dataset = load_dataset("text",
                            data_files={"test": os.path.join(train_data_folder, cfg['run']['test_file'])})["test"]
 
