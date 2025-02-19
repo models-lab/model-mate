@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 from inference import ModelInference
 
@@ -13,6 +14,7 @@ class FlaskModelMateApp:
             app.config.from_prefixed_env()
 
         self.app = app
+        CORS(app)
         self.model = model
 
         self.host = host
@@ -22,8 +24,10 @@ class FlaskModelMateApp:
         def recommend_fragment():
             data = request.get_json()
             text = data['context'].strip()
-            # type_ = data.get('type', 'token')
-
+            end_token = '}'
+            if 'end_token' in data:
+                end_token = data['end_token']
+                
             cfg = {
                 "num_beams": 4,
                 "max_new_tokens": 128,
@@ -31,7 +35,7 @@ class FlaskModelMateApp:
             }
 
             start = time.time()
-            fragments = self.model.get_suggestions_next_block(text, **cfg)
+            fragments = self.model.get_suggestions_next_block(text, end_token = end_token, **cfg)
             end = time.time()
 
             print(f"Time: {end - start}")

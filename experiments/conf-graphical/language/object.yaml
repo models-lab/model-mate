@@ -1,0 +1,6 @@
+name: object
+keywords: ["create", "set", "ref", "owner"]
+
+block:
+  start: '{'
+  end: "}"

@@ -1,0 +1,4 @@
+is_pretrained: True
+hugging_face_model: codeparrot/codeparrot-small-multi
+model_name: codeparrot/codeparrot-small-multi
+local_tokenizer: False

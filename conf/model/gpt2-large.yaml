@@ -1,4 +1,0 @@
-is_pretrained: True
-hugging_face_model: gpt2-large
-model_name: gpt2-large
-local_tokenizer: False
