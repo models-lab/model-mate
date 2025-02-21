@@ -8,7 +8,8 @@ Root = EClass('NodeRedModel')
 # Define Node class
 Node = EClass('Node')
 Node.eStructuralFeatures.append(EAttribute('type', EString))
-Node.eStructuralFeatures.append(EReference('wired_to', Node, upper=-1, containment=False))
+Node.eStructuralFeatures.append(EAttribute('name', EString))
+Node.eStructuralFeatures.append(EReference('next', Node, upper=-1, containment=False))
 
 # Link Node to Root
 Root.eStructuralFeatures.append(EReference('nodes', Node, upper=-1, containment=True))
