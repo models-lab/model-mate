@@ -1,4 +1,6 @@
 import json
+
+from integrations.datasets.nodered.metamodel import nodered_package
 from metamodel import Node, Root
 from pyecore.resources import ResourceSet
 import os
@@ -98,5 +100,11 @@ def process_node_red_node(data):
 
 if __name__ == '__main__':
 #    parse_node_red_file('/tmp/example.json')
-#    parse_node_red_scrapped_dataset('nodered_flows.json', output_folder='output/web')
+#    parse_node_red_scrapped_dataset('data/nodered_flows.json', output_folder='output/web')
     parse_node_red_github_dataset('data/nodered-github', output_folder='output/github')
+
+    # Serialize the metamodel, so that it can be used to load the generated XMIs generically
+    rset = ResourceSet()
+    resource = rset.create_resource("nodered.ecore")
+    resource.append(nodered_package)
+    resource.save()
