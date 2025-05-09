@@ -1,11 +1,10 @@
-import argparse
 import os
 import sys
 
-from argparse import Namespace
+from argparse import ArgumentParser, Namespace
 
 def parse_args() -> Namespace:
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         description="Process files with a given extension in a directory and write output to a file."
     )
     parser.add_argument(
