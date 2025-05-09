@@ -9,5 +9,5 @@ wget -O modelset-token-dedup.txt   http://models-lab.inf.um.es/files/model-mate/
 wget -O xtext-mar-dup.txt          http://models-lab.inf.um.es/files/model-mate/dataset/xtext-mar-dup.txt
 wget -O xtext-mar-dedup.txt        http://models-lab.inf.um.es/files/model-mate/dataset/xtext-mar-dedup.txt
 wget -O ecore-mar-lines-dedup.txt  http://models-lab.inf.um.es/files/model-mate/dataset/ecore-mar-lines-dedup.txt
-wget -O ecore-mar-token-dedup.txt        http://models-lab.inf.um.es/files/model-mate/dataset/ecore-mar-token-dedup.txt
+wget -O ecore-mar-token-dedup.txt  http://models-lab.inf.um.es/files/model-mate/dataset/ecore-mar-token-dedup.txt
 

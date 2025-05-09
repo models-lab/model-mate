@@ -7,6 +7,8 @@ from tqdm import tqdm
 import pandas as pd
 import time
 import tiktoken
+import random
+import json
 
 def main(args):
     random.seed(args.seed)
@@ -16,7 +18,7 @@ def main(args):
         parsed_test = json.load(f)
 
     prompt = """
-            Examples: 
+            Examples:
             <s> @ namespace ( uri = <URIPRE> , prefix = <URIPRE> ) package Courses ; class Course { attr String [ ? ] name ; val Person [ * ] members ; attr String [ ? ] id ; attr double [ ? ] credit ; val Assignment [ * ] assignments ; } class Person { attr String [ ? ] name ; attr int [ ? ] id ; attr String [ ? ] role ; ref Answer [ * ] assignmentDelivery ; } class Assignment { attr String [ ? ] name ; attr String [ ? ] description ; attr boolean [ ? ] mandatory ; val Answer [ * ] answer ; } class Answer { attr int [ ? ] id ; attr String [ ? ] text ; attr boolean [ ? ] pass ; } </s>
             <s> @ namespace ( uri = <URIPRE> , prefix = <URIPRE> ) package statemachine ; class StateMachine { val Declaration [ * ] declarations ; val StateMachineVariable [ * ] machineVariables ; } abstract class Declaration { } class Transition extends Declaration { attr String [ 1 ] label ; attr String [ ? ] sourceLabel ; attr String [ ? ] targetLabel ; ref State [ ? ] source ; ref State [ ? ] target ; attr String [ 1 ] guardLabel ; attr String [ ? ] actionLabel ; attr String [ ? ] guardExpression ; attr String [ ? ] actionStatement ; } abstract class State extends Declaration { attr String [ 1 ] label ; ref State [ * ] successors ; ref State [ * ] reachable ; attr int [ 1 ] id ; } class Action { attr String [ ? ] actionLabel ; attr String [ ? ] actionStatement ; } class StateMachineVariable { attr String [ 1 ] type ; attr String [ 1 ] name ; } class NormalState extends State { val Action [ ? ] entry ; } class InitialState extends State { } class FinalState extends State { } </s>
             <s> @ namespace ( uri = <URIPRE> , prefix = <URIPRE> ) package argumentation ; class ArgumentationFramework { val PersuadeeArgumentationFramework [ + ] persuadeeArgumentationFramework ; val Persuader [ 1 ] hasPersuader ; attr int [ ? ] ID ; val Argument [ + ] hasArgument ; ref Argument [ ? ] hasTopic ; } class Persuader { ref ArgumentationFramework [ 1 ] hasArgumentationFramework ; attr int [ ? ] ID ; ref Argument [ * ] putsForward ; } class Argument { ref Argument [ * ] attacks ; attr int [ ? ] ID ; ref PersuadeeArgumentationFramework [ ? ] assertArgument ; attr String [ ? ] name ; } class Persuadee { ref PersuadeeArgumentationFramework [ 1 ] hasPersuadeeArgumentationFramework ; attr int [ ? ] ID ; } class PersuadeeArgumentationFramework { ref Argument [ + ] hasArgument ; val Persuadee [ 1 ] hasPersuadee ; attr int [ ? ] ID ; ref Argument [ * ] absorbsArgument ; } </s>
