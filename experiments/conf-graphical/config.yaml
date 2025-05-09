@@ -1,0 +1,7 @@
+defaults:
+  - dataset: class-diagram-ecore 
+  - run: default
+  - model: codeparrot_multi
+  - params: default
+  - evaluation: default
+  - language: object

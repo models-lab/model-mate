@@ -1,4 +1,0 @@
-is_pretrained: True
-hugging_face_model: facebook/opt-350m
-model_name: facebook/opt-350m
-local_tokenizer: False
