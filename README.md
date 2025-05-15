@@ -61,13 +61,13 @@ The tokenizer can be implemented by adapting the code in `modelmate.integration.
 ```java
 public class MyLanguageTokenizer implements Tokenizer {
 
-	private Injector injector = /* Get your language injector */;
-	private Generator generator = new Generator(injector);
+   private Injector injector = /* Get your language injector */;
+   private Generator generator = new Generator(injector);
 
-	@Override
-	public String tokenize(String fragment) {
-		return generator.toTokens(fragment);
-	}
+   @Override
+   public String tokenize(String fragment) {
+      return generator.toTokens(fragment);
+   }
 }
 ```
 
