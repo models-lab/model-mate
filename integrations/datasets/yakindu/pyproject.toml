@@ -1,0 +1,10 @@
+[project]
+name = "yakindu"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pyecore>=0.15.2",
+    "pyecoregen>=0.5.1",
+]
